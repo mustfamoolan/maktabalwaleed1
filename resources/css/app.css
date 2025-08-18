@@ -1,0 +1,84 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+/* Sidebar Custom Scrollbar Styles */
+.sidebar-content {
+    scrollbar-width: thin;
+    scrollbar-color: #CBD5E0 #F7FAFC;
+}
+
+.sidebar-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+    background: #F7FAFC;
+    border-radius: 6px;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb:hover {
+    background: #A0AEC0;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 1024px) {
+    .sidebar-content nav {
+        /* Ensure navigation takes available space but allows footer to show */
+        max-height: calc(100vh - 180px);
+        overflow-y: auto;
+    }
+
+    .sidebar-content::-webkit-scrollbar {
+        width: 4px;
+    }
+}
+
+/* Smooth sidebar transitions */
+.sidebar-transition {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure footer is always visible in mobile */
+@media (max-width: 640px) {
+    .sidebar-content {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+    }
+
+    .sidebar-content nav {
+        flex: 1 !important;
+        min-height: 0 !important;
+        max-height: calc(100vh - 120px) !important;
+        overflow-y: auto !important;
+    }
+
+    .sidebar-content > div:last-child {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+    }
+}
+
+/* Force visibility of footer */
+.sidebar-footer {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: white !important;
+    z-index: 10 !important;
+}

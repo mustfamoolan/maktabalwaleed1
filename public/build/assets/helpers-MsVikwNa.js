@@ -1,0 +1,1 @@
+const n=r=>{if(r==null||isNaN(r))return"0 د.ع";const e=parseFloat(r);return new Intl.NumberFormat("ar-IQ",{style:"currency",currency:"IQD",minimumFractionDigits:0,maximumFractionDigits:2}).format(e).replace("IQD","د.ع")},t=r=>{if(!r)return"";const e=new Date(r);return new Intl.DateTimeFormat("ar-IQ",{year:"numeric",month:"long",day:"numeric"}).format(e)};export{t as a,n as f};
