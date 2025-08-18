@@ -16,7 +16,22 @@ import {
     FaFilter
 } from 'react-icons/fa';
 
-export default function CreateInvoice({ representative, customers, products }) {
+export default function CreateInvoice({ representative, customers = [], products = [] }) {
+    // التحقق من وجود البيانات المطلوبة
+    if (!representative) {
+        return (
+            <RepresentativeLayout title="نقطة البيع">
+                <Head title="نقطة البيع" />
+                <div className="min-h-screen flex items-center justify-center">
+                    <div className="text-center">
+                        <h2 className="text-xl font-bold text-red-600 mb-4">خطأ في تحميل البيانات</h2>
+                        <p className="text-gray-600">لم يتم العثور على بيانات المندوب</p>
+                    </div>
+                </div>
+            </RepresentativeLayout>
+        );
+    }
+
     const [selectedCustomer, setSelectedCustomer] = useState(null);
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +41,7 @@ export default function CreateInvoice({ representative, customers, products }) {
     const [viewMode, setViewMode] = useState('grid'); // grid or list
 
     const { data, setData, post, processing, errors } = useForm({
-        representative_id: representative.id,
+        representative_id: representative?.id || '',
         customer_id: '',
         items: [],
         paid_amount: 0,
@@ -35,8 +50,9 @@ export default function CreateInvoice({ representative, customers, products }) {
 
     // فلترة المنتجات
     const filteredProducts = products.filter(product => {
+        if (!product || !product.name) return false;
         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                             product.barcode.toLowerCase().includes(searchTerm.toLowerCase());
+                             (product.barcode && product.barcode.toLowerCase().includes(searchTerm.toLowerCase()));
         const matchesCategory = selectedCategory === '' || product.supplier_type?.name === selectedCategory;
         return matchesSearch && matchesCategory;
     });
@@ -262,7 +278,7 @@ export default function CreateInvoice({ representative, customers, products }) {
                             <option value="">اختر العميل...</option>
                             {customers.map(customer => (
                                 <option key={customer.id} value={customer.id}>
-                                    {customer.name}
+                                    {customer.customer_name || customer.name}
                                 </option>
                             ))}
                         </select>
@@ -591,7 +607,7 @@ function CartSection({ cart, selectedCustomer, customers, onSelectCustomer, onUp
                     <option value="">اختر العميل...</option>
                     {customers.map(customer => (
                         <option key={customer.id} value={customer.id}>
-                            {customer.name}
+                            {customer.customer_name || customer.name}
                         </option>
                     ))}
                 </select>
@@ -742,7 +758,7 @@ function MobileCartModal({ cart, selectedCustomer, customers, onSelectCustomer, 
                         <option value="">اختر العميل...</option>
                         {customers.map(customer => (
                             <option key={customer.id} value={customer.id}>
-                                {customer.name}
+                                {customer.customer_name || customer.name}
                             </option>
                         ))}
                     </select>

@@ -16,6 +16,29 @@ Route::get('/', function () {
     return Inertia::render('Landing');
 });
 
+// مسار اختبار سريع
+Route::get('/test-pos', function () {
+    return "نظام نقاط البيع يعمل!";
+});
+
+// مسار اختبار نقاط البيع خارج الـ middleware
+Route::get('/pos-demo', function () {
+    // الحصول على أول مندوب
+    $representative = \App\Models\Representative::first();
+    if (!$representative) {
+        return "لا توجد مندوبين في النظام";
+    }
+
+    $customers = \App\Models\RepresentativeCustomer::where('representative_id', $representative->id)->get();
+    $products = \App\Models\Product::with('supplierType')->where('is_active', true)->where('cartons_count', '>', 0)->get();
+
+    return Inertia::render('RepresentativesPanel/POS/CreateInvoice', [
+        'representative' => $representative,
+        'customers' => $customers,
+        'products' => $products
+    ]);
+});
+
 // مسارات تسجيل الدخول للأقسام المختلفة
 Route::get('/admin/login', [AdminAuthController::class, 'showLogin']);
 Route::post('/admin/login', [AdminAuthController::class, 'login']);
@@ -141,39 +164,25 @@ Route::prefix('admin')->group(function () {
 Route::prefix('representatives')->middleware('representative.auth')->group(function () {
     Route::get('/dashboard', [RepresentativeAuthController::class, 'dashboard'])->name('representatives.dashboard');
 
-    // مسارات العملاء
-    Route::resource('representatives.customers', RepresentativeCustomerController::class);
-});
+    // مسارات العملاء للمندوبين
+    Route::get('/customers', [RepresentativeCustomerController::class, 'index'])->name('representatives.customers.index');
+    Route::get('/customers/create', [RepresentativeCustomerController::class, 'create'])->name('representatives.customers.create');
+    Route::post('/customers', [RepresentativeCustomerController::class, 'store'])->name('representatives.customers.store');
+    Route::get('/customers/{customer}', [RepresentativeCustomerController::class, 'show'])->name('representatives.customers.show');
+    Route::get('/customers/{customer}/edit', [RepresentativeCustomerController::class, 'edit'])->name('representatives.customers.edit');
+    Route::put('/customers/{customer}', [RepresentativeCustomerController::class, 'update'])->name('representatives.customers.update');
+    Route::delete('/customers/{customer}', [RepresentativeCustomerController::class, 'destroy'])->name('representatives.customers.destroy');
 
-// مسارات الفواتير ونقاط البيع
-Route::middleware(['web'])->group(function () {
-    // مسارات إدارة الفواتير (للإدارة)
-    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
-    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
-    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
-    Route::patch('/invoices/{invoice}/payment', [InvoiceController::class, 'updatePayment'])->name('invoices.updatePayment');
-    Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+    // مسارات نقاط البيع للمندوبين
+    Route::get('/pos/create', [InvoiceController::class, 'create'])->name('representatives.pos.create');
 
-    // مسارات نقاط البيع (للمندوبين)
-    Route::get('/pos/create', [InvoiceController::class, 'create'])->name('pos.create');
-    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
-
-    // احصائيات المندوب
-    Route::get('/representatives/{representative}/stats', [InvoiceController::class, 'representativeStats'])
-        ->name('representatives.stats');
-});
-
-// مسارات المندوبين
-Route::prefix('representatives')->middleware(['web'])->group(function () {
-    // مسارات إضافية للمندوبين
-    Route::get('/orders', function () {
-        return Inertia::render('RepresentativesPanel/Orders', [
-            'representative_user' => session('representative_user')
-        ]);
-    })->name('representatives.orders');
-
+    // مسارات الفواتير للمندوبين
     Route::get('/invoices', function () {
         $representative = session('representative_user');
+        if (!$representative) {
+            return redirect()->route('representatives.login.form');
+        }
+
         $invoices = \App\Models\Invoice::with(['customer'])
             ->where('representative_id', $representative['id'])
             ->latest()
@@ -185,6 +194,15 @@ Route::prefix('representatives')->middleware(['web'])->group(function () {
             'filters' => request()->only(['status'])
         ]);
     })->name('representatives.invoices');
+
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'representativeShow'])->name('representatives.invoices.show');
+
+    // مسارات إضافية للمندوبين
+    Route::get('/orders', function () {
+        return Inertia::render('RepresentativesPanel/Orders', [
+            'representative_user' => session('representative_user')
+        ]);
+    })->name('representatives.orders');
 
     Route::get('/payments', function () {
         return Inertia::render('RepresentativesPanel/Payments', [
@@ -209,6 +227,23 @@ Route::prefix('representatives')->middleware(['web'])->group(function () {
             'representative_user' => session('representative_user')
         ]);
     })->name('representatives.settings');
+});
+
+// مسارات الفواتير ونقاط البيع
+Route::middleware(['web'])->group(function () {
+    // مسارات إدارة الفواتير (للإدارة)
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+    Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
+    Route::patch('/invoices/{invoice}/payment', [InvoiceController::class, 'updatePayment'])->name('invoices.updatePayment');
+    Route::get('/invoices/{invoice}/print', [InvoiceController::class, 'print'])->name('invoices.print');
+
+    // مسارات نقاط البيع العامة
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+
+    // احصائيات المندوب
+    Route::get('/representatives/{representative}/stats', [InvoiceController::class, 'representativeStats'])
+        ->name('representatives.stats');
 });
 
 // مسارات لوحة تحكم المجهزين

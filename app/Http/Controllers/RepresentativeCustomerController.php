@@ -11,9 +11,93 @@ use Inertia\Inertia;
 class RepresentativeCustomerController extends Controller
 {
     /**
-     * عرض عملاء المندوب
+     * عرض عملاء المندوب الحالي
      */
-    public function index(Representative $representative, Request $request)
+    public function index(Request $request)
+    {
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        $representative = Representative::find($representative_user['id']);
+        if (!$representative) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        $query = $representative->customers();
+
+        // البحث
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('customer_name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%")
+                  ->orWhere('governorate', 'like', "%{$search}%");
+            });
+        }
+
+        $customers = $query->orderBy('created_at', 'desc')->get();
+
+        return Inertia::render('RepresentativesPanel/Customers', [
+            'representative_user' => $representative_user,
+            'customers' => $customers,
+            'total' => $customers->count(),
+            'filters' => $request->only(['search', 'governorate', 'status'])
+        ]);
+    }
+
+    /**
+     * عرض صفحة إضافة عميل جديد
+     */
+    public function create()
+    {
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        return Inertia::render('RepresentativesPanel/CustomerCreate', [
+            'representative_user' => $representative_user
+        ]);
+    }
+
+    /**
+     * حفظ عميل جديد
+     */
+    public function store(Request $request)
+    {
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        $validated = $request->validate([
+            'customer_name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'required|string',
+            'governorate' => 'required|string|max:100',
+            'city' => 'required|string|max:100',
+            'nearest_landmark' => 'nullable|string|max:255',
+            'total_debt' => 'nullable|numeric|min:0',
+            'notes' => 'nullable|string'
+        ]);
+
+        $validated['representative_id'] = $representative_user['id'];
+        $validated['total_debt'] = $validated['total_debt'] ?? 0;
+        $validated['status'] = 'active';
+
+        RepresentativeCustomer::create($validated);
+
+        return redirect()->route('representatives.customers.index')
+            ->with('success', 'تم إضافة العميل بنجاح');
+    }
+
+    /**
+     * عرض عملاء المندوب - للإدارة
+     */
+    public function adminIndex(Representative $representative, Request $request)
     {
         $query = $representative->customers();
 
@@ -28,59 +112,19 @@ class RepresentativeCustomerController extends Controller
             });
         }
 
-        // فلترة حسب المحافظة
-        if ($request->filled('governorate')) {
-            $query->where('governorate', $request->governorate);
-        }
+        $customers = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        // فلترة حسب الحالة
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        // فلترة المدينين
-        if ($request->filled('has_debt') && $request->has_debt == '1') {
-            $query->withDebt();
-        }
-
-        // فلترة المتأخرين
-        if ($request->filled('overdue') && $request->overdue == '1') {
-            $query->overdue();
-        }
-
-        $customers = $query->latest()->paginate(20);
-
-        // إحصائيات سريعة
-        $stats = [
-            'total_customers' => $representative->customers()->count(),
-            'active_customers' => $representative->customers()->active()->count(),
-            'customers_with_debt' => $representative->customers()->withDebt()->count(),
-            'overdue_customers' => $representative->customers()->overdue()->count(),
-            'total_debt' => $representative->customers()->sum('total_debt'),
-            'total_paid' => $representative->customers()->sum('total_paid'),
-        ];
-
-        // المحافظات للفلترة
-        $governorates = $representative->customers()
-                                     ->select('governorate')
-                                     ->distinct()
-                                     ->pluck('governorate')
-                                     ->filter()
-                                     ->values();
-
-        return inertia('Admin/Representatives/Customers', [
+        return Inertia::render('Admin/Representatives/Customers', [
             'representative' => $representative,
             'customers' => $customers,
-            'stats' => $stats,
-            'governorates' => $governorates,
-            'filters' => $request->only(['search', 'governorate', 'status', 'has_debt', 'overdue'])
+            'filters' => $request->only(['search', 'governorate', 'status'])
         ]);
     }
 
     /**
-     * حفظ عميل جديد
+     * حفظ عميل جديد - للإدارة
      */
-    public function store(Representative $representative, Request $request)
+    public function adminStore(Representative $representative, Request $request)
     {
         $validator = Validator::make($request->all(), [
             'customer_name' => 'required|string|max:255',
@@ -170,9 +214,10 @@ class RepresentativeCustomerController extends Controller
             return back()->withErrors(['error' => 'غير مسموح بحذف هذا العميل']);
         }
 
-        // التحقق من عدم وجود فواتير أو معاملات
-        if ($customer->total_purchases > 0 || $customer->total_debt > 0) {
-            return back()->withErrors(['error' => 'لا يمكن حذف عميل له معاملات مالية. يرجى تغيير حالته إلى غير نشط بدلاً من الحذف']);
+        // التحقق من عدم وجود فواتير مع هذا العميل
+        $invoicesCount = \App\Models\Invoice::where('customer_id', $customer->id)->count();
+        if ($invoicesCount > 0) {
+            return back()->withErrors(['error' => 'لا يمكن حذف عميل له فواتير. يرجى تغيير حالته إلى غير نشط بدلاً من الحذف']);
         }
 
         $customer->delete();
@@ -191,12 +236,13 @@ class RepresentativeCustomerController extends Controller
         }
 
         // إحصائيات مفصلة للعميل
+        $invoices = \App\Models\Invoice::where('customer_id', $customer->id)->get();
         $customerStats = [
-            'total_invoices' => $customer->completed_invoices + $customer->cancelled_invoices + $customer->returned_invoices,
-            'success_rate' => $customer->success_rate,
-            'remaining_debt' => $customer->remaining_debt,
-            'is_overdue' => $customer->is_overdue,
-            'last_purchase_date' => null, // سيتم تحديثه لاحقاً عند إضافة الفواتير
+            'total_invoices' => $invoices->count(),
+            'total_amount' => $invoices->sum('total_amount'),
+            'paid_amount' => $invoices->sum('paid_amount'),
+            'remaining_amount' => $invoices->sum('remaining_amount'),
+            'last_purchase_date' => $invoices->max('created_at'),
         ];
 
         return inertia('Admin/Representatives/CustomerDetails', [

@@ -34,7 +34,7 @@ const Dashboard = ({ representative_user, customers = [], statistics = {} }) => 
             title: 'نقاط البيع',
             description: 'إنشاء فاتورة جديدة للعميل',
             icon: <FaFileInvoiceDollar />,
-            href: '/pos/create?representative_id=' + representative_user?.id,
+            href: '/representatives/pos/create',
             bgColor: 'bg-gradient-to-br from-emerald-100 to-emerald-200',
             iconColor: 'bg-emerald-500'
         },
@@ -50,7 +50,7 @@ const Dashboard = ({ representative_user, customers = [], statistics = {} }) => 
             title: 'الفواتير',
             description: 'عرض وإدارة الفواتير',
             icon: <FaFileInvoiceDollar />,
-            href: '/invoices',
+            href: '/representatives/invoices',
             bgColor: 'bg-gradient-to-br from-purple-100 to-purple-200',
             iconColor: 'bg-purple-500'
         },

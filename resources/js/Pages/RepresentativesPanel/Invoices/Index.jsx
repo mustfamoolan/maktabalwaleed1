@@ -3,8 +3,23 @@ import { Head, Link, router } from '@inertiajs/react';
 import RepresentativeLayout from '@/Layouts/RepresentativeLayout';
 import { formatCurrency, formatDate } from '@/utils/helpers';
 
-export default function InvoicesIndex({ invoices, representative_user, filters }) {
+export default function InvoicesIndex({ invoices = { data: [] }, representative_user, filters = {} }) {
     const [statusFilter, setStatusFilter] = useState(filters.status || '');
+
+    // التحقق من صحة البيانات
+    if (!representative_user) {
+        return (
+            <RepresentativeLayout title="الفواتير">
+                <Head title="الفواتير" />
+                <div className="bg-white p-6 rounded-lg shadow">
+                    <p className="text-center text-gray-500">جاري تحميل البيانات...</p>
+                </div>
+            </RepresentativeLayout>
+        );
+    }
+
+    // التأكد من أن invoices.data موجود
+    const invoiceData = invoices?.data || [];
 
     const statusOptions = [
         { value: '', label: 'جميع الحالات' },
@@ -36,7 +51,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
     };
 
     const handleFilter = () => {
-        router.get(route('representatives.invoices'), {
+        router.get('/representatives/invoices', {
             status: statusFilter
         }, {
             preserveState: true,
@@ -60,7 +75,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                         </div>
                         <div className="mt-4 sm:mt-0 flex space-x-3 space-x-reverse">
                             <Link
-                                href={route('pos.create', { representative_id: representative_user.id })}
+                                href="/representatives/pos/create"
                                 className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
                             >
                                 إنشاء فاتورة جديدة
@@ -112,7 +127,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                             <h3 className="text-lg font-medium text-gray-900 mb-2">لا توجد فواتير</h3>
                             <p className="text-gray-600 mb-6">لم تقم بإنشاء أي فواتير بعد</p>
                             <Link
-                                href={route('pos.create', { representative_id: representative_user.id })}
+                                href="/representatives/pos/create"
                                 className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium"
                             >
                                 إنشاء أول فاتورة
@@ -130,7 +145,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                                                     {invoice.invoice_number}
                                                 </h3>
                                                 <p className="text-sm text-gray-600">
-                                                    {invoice.customer.name}
+                                                    {invoice.customer ? invoice.customer.customer_name : 'عميل محذوف'}
                                                 </p>
                                             </div>
                                             {getStatusBadge(invoice.status)}
@@ -156,7 +171,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                                         </div>
 
                                         <Link
-                                            href={route('invoices.show', invoice.id)}
+                                            href={`/representatives/invoices/${invoice.id}`}
                                             className="block w-full text-center bg-blue-50 text-blue-600 py-2 rounded-lg text-sm font-medium"
                                         >
                                             عرض التفاصيل
@@ -206,10 +221,10 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm text-gray-900">
-                                                        {invoice.customer.name}
+                                                        {invoice.customer ? invoice.customer.customer_name : 'عميل محذوف'}
                                                     </div>
                                                     <div className="text-sm text-gray-500">
-                                                        {invoice.customer.governorate}
+                                                        {invoice.customer ? invoice.customer.governorate : '-'}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -237,7 +252,7 @@ export default function InvoicesIndex({ invoices, representative_user, filters }
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                     <Link
-                                                        href={route('invoices.show', invoice.id)}
+                                                        href={`/representatives/invoices/${invoice.id}`}
                                                         className="text-blue-600 hover:text-blue-900"
                                                     >
                                                         عرض

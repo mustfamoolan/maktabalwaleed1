@@ -13,8 +13,39 @@ use Illuminate\Support\Facades\DB;
 
 class InvoiceController extends Controller
 {
-    // عرض قائمة الفواتير
+    // عرض قائمة الفواتير للمندوبين
     public function index(Request $request)
+    {
+        // الحصول على المندوب من الجلسة أو استخدام أول مندوب للاختبار
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            // استخدام أول مندوب للاختبار
+            $representative = Representative::first();
+            if (!$representative) {
+                return response('لا توجد مندوبين في النظام', 404);
+            }
+            $representative_id = $representative->id;
+        } else {
+            $representative_id = $representative_user['id'];
+        }
+
+        $invoices = Invoice::with(['customer'])
+            ->where('representative_id', $representative_id)
+            ->when($request->status, function ($query, $status) {
+                return $query->where('status', $status);
+            })
+            ->latest()
+            ->paginate(20);
+
+        return Inertia::render('RepresentativesPanel/Invoices/Index', [
+            'invoices' => $invoices,
+            'representative_user' => $representative_user ?? ['id' => $representative_id],
+            'filters' => $request->only(['status'])
+        ]);
+    }
+
+    // عرض قائمة الفواتير العامة (للإدارة)
+    public function adminIndex(Request $request)
     {
         $invoices = Invoice::with(['representative', 'customer', 'items'])
             ->when($request->status, function ($query, $status) {
@@ -46,11 +77,36 @@ class InvoiceController extends Controller
         ]);
     }
 
+    // عرض تفاصيل فاتورة للمندوبين
+    public function representativeShow($id)
+    {
+        // الحصول على المندوب من الجلسة
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        $invoice = Invoice::with(['representative', 'customer', 'items.product'])
+            ->where('representative_id', $representative_user['id'])
+            ->findOrFail($id);
+
+        return Inertia::render('RepresentativesPanel/Invoices/Show', [
+            'invoice' => $invoice
+        ]);
+    }
+
     // نموذج إنشاء فاتورة جديدة (للمندوبين)
     public function create(Request $request)
     {
-        $representative = Representative::findOrFail($request->representative_id);
-        $customers = RepresentativeCustomer::where('representative_id', $request->representative_id)
+        // الحصول على المندوب من الجلسة
+        $representative_user = session('representative_user');
+        if (!$representative_user) {
+            return redirect()->route('representatives.login.form');
+        }
+
+        $representative = Representative::findOrFail($representative_user['id']);
+        $customers = RepresentativeCustomer::where('representative_id', $representative->id)
+            ->where('status', 'active')
             ->get();
         $products = Product::with('supplierType')
             ->where('is_active', true)

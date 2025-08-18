@@ -44,6 +44,11 @@ class RepresentativeCustomer extends Model
         return $this->belongsTo(Representative::class);
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class, 'customer_id');
+    }
+
     // Scopes
     public function scopeActive($query)
     {

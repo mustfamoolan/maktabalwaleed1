@@ -16,9 +16,6 @@
 
 /public/hot
 
-# Storage files (but keep directory structure)
-/storage/app/public/products/*
-!/storage/app/public/products/.gitkeep
 
 /storage/pail
 /vendor
