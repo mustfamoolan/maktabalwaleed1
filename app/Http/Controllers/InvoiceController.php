@@ -177,14 +177,21 @@ class InvoiceController extends Controller
                 // تحديث المخزون بعدد الكراتين المستخدمة
                 $product->decrement('cartons_count', $cartons_quantity);
             }            // تحديث إجمالي الفاتورة والمبلغ المتبقي
+            $remainingAmount = $totalAmount - ($request->paid_amount ?? 0);
             $invoice->update([
                 'total_amount' => $totalAmount,
-                'remaining_amount' => $totalAmount - ($request->paid_amount ?? 0)
+                'remaining_amount' => $remainingAmount
             ]);
+
+            // تحديث ديون العميل
+            $customer = RepresentativeCustomer::find($request->customer_id);
+            if ($customer) {
+                $customer->increment('total_debt', $remainingAmount);
+            }
         });
 
         return redirect()->route('representatives.invoices')
-            ->with('success', 'تم إنشاء الفاتورة بنجاح');
+            ->with('success', 'تم إنشاء الفاتورة بنجاح وتحديث المخزن وديون العميل');
     }
 
     // تحديث حالة الفاتورة
@@ -194,8 +201,33 @@ class InvoiceController extends Controller
             'status' => 'required|in:pending,preparing,shipping,delivered,returned,cancelled'
         ]);
 
-        $invoice = Invoice::findOrFail($id);
-        $invoice->update(['status' => $request->status]);
+        $invoice = Invoice::with('items.product', 'customer')->findOrFail($id);
+        $oldStatus = $invoice->status;
+        $newStatus = $request->status;
+
+        DB::transaction(function () use ($invoice, $oldStatus, $newStatus) {
+            // إذا كانت الفاتورة تم إلغاؤها، إرجاع المنتجات للمخزن وتعديل ديون العميل
+            if ($newStatus === 'cancelled' && $oldStatus !== 'cancelled') {
+                // إرجاع المنتجات للمخزن
+                foreach ($invoice->items as $item) {
+                    $item->product->increment('cartons_count', $item->cartons_quantity);
+                }
+
+                // إرجاع المبلغ المتبقي من ديون العميل
+                if ($invoice->customer && $invoice->remaining_amount > 0) {
+                    $invoice->customer->decrement('total_debt', $invoice->remaining_amount);
+                }
+
+                // تصفير المبلغ المتبقي
+                $invoice->update([
+                    'status' => $newStatus,
+                    'remaining_amount' => 0
+                ]);
+            } else {
+                // تحديث الحالة فقط
+                $invoice->update(['status' => $newStatus]);
+            }
+        });
 
         return redirect()->back()
             ->with('success', 'تم تحديث حالة الفاتورة بنجاح');
@@ -215,13 +247,31 @@ class InvoiceController extends Controller
                 ->withErrors(['paid_amount' => 'المبلغ المدفوع لا يمكن أن يكون أكبر من إجمالي الفاتورة']);
         }
 
-        $invoice->update([
-            'paid_amount' => $request->paid_amount,
-            'remaining_amount' => $invoice->total_amount - $request->paid_amount
-        ]);
+        DB::transaction(function () use ($invoice, $request) {
+            // حساب الفرق في المدفوعات
+            $oldPaidAmount = $invoice->paid_amount;
+            $newPaidAmount = $request->paid_amount;
+            $paymentDifference = $newPaidAmount - $oldPaidAmount;
+
+            // تحديث الفاتورة
+            $newRemainingAmount = $invoice->total_amount - $newPaidAmount;
+            $invoice->update([
+                'paid_amount' => $newPaidAmount,
+                'remaining_amount' => $newRemainingAmount
+            ]);
+
+            // تحديث ديون العميل (تقليل الدين بمقدار الدفعة الإضافية)
+            $customer = RepresentativeCustomer::find($invoice->customer_id);
+            if ($customer && $paymentDifference > 0) {
+                $customer->decrement('total_debt', $paymentDifference);
+            } elseif ($customer && $paymentDifference < 0) {
+                // في حالة تقليل المدفوع، زيادة الدين
+                $customer->increment('total_debt', abs($paymentDifference));
+            }
+        });
 
         return redirect()->back()
-            ->with('success', 'تم تحديث المدفوعات بنجاح');
+            ->with('success', 'تم تحديث المدفوعات وديون العميل بنجاح');
     }
 
     // طباعة الفاتورة

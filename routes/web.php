@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RepresentativeController;
@@ -80,11 +81,11 @@ Route::post('/logout', [AdminAuthController::class, 'logout']);
 
 // مسارات لوحة تحكم الإدارة
 Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Admin/Dashboard', [
-            'admin_user' => session('admin_user')
-        ]);
-    });
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+    // مسارات AJAX للتحديث المباشر
+    Route::get('/live-stats', [AdminDashboardController::class, 'liveStats']);
+    Route::get('/recent-activity', [AdminDashboardController::class, 'recentActivity']);
 
     Route::get('/pos', function () {
         return Inertia::render('Admin/POS', [
@@ -129,11 +130,17 @@ Route::prefix('admin')->group(function () {
     Route::get('/representatives/{representative}/performance', [RepresentativeManagementController::class, 'performanceReport'])->name('admin.representatives.performance');
 
     // مسارات عملاء المندوبين
-    Route::get('/representatives/{representative}/customers', [RepresentativeCustomerController::class, 'index'])->name('admin.representatives.customers.index');
-    Route::post('/representatives/{representative}/customers', [RepresentativeCustomerController::class, 'store'])->name('admin.representatives.customers.store');
+    Route::get('/representatives/{representative}/customers', [RepresentativeCustomerController::class, 'adminIndex'])->name('admin.representatives.customers.index');
+    Route::post('/representatives/{representative}/customers', [RepresentativeCustomerController::class, 'adminStore'])->name('admin.representatives.customers.store');
     Route::put('/representatives/{representative}/customers/{customer}', [RepresentativeCustomerController::class, 'update'])->name('admin.representatives.customers.update');
     Route::delete('/representatives/{representative}/customers/{customer}', [RepresentativeCustomerController::class, 'destroy'])->name('admin.representatives.customers.destroy');
     Route::get('/representatives/{representative}/customers/{customer}', [RepresentativeCustomerController::class, 'show'])->name('admin.representatives.customers.show');
+
+    // مسارات إدارة الفواتير في الإدارة
+    Route::get('/invoices', [InvoiceController::class, 'adminIndex'])->name('admin.invoices.index');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('admin.invoices.show');
+    Route::put('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('admin.invoices.status');
+    Route::put('/invoices/{invoice}/payment', [InvoiceController::class, 'updatePayment'])->name('admin.invoices.payment');
 
     Route::get('/drivers', function () {
         return Inertia::render('Admin/Drivers', [
