@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Invoice;
-use App\Models\Representative;
-use App\Models\RepresentativeCustomer;
+use App\Models\SalesRepresentative;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Supplier;
 use Carbon\Carbon;
@@ -25,31 +25,31 @@ class AdminDashboardController extends Controller
             'total_invoices_pending' => Invoice::where('status', 'pending')->count(),
 
             // إحصائيات المندوبين
-            'total_representatives' => Representative::where('is_active', true)->count(),
-            'active_representatives_today' => Invoice::whereDate('created_at', today())
-                ->distinct('representative_id')->count(),
+            'total_representatives' => SalesRepresentative::where('is_active', true)->count(),
+            'active_representatives_today' => Invoice::whereDate('invoice_date', today())
+                ->distinct('sales_representative_id')->count(),
 
             // إحصائيات العملاء
-            'total_customers' => RepresentativeCustomer::where('status', 'active')->count(),
-            'customers_with_debt' => RepresentativeCustomer::where('total_debt', '>', 0)->count(),
-            'total_debt_amount' => RepresentativeCustomer::sum('total_debt'),
+            'total_customers' => Customer::where('is_active', true)->count(),
+            'customers_with_debt' => Customer::where('current_balance', '>', 0)->count(),
+            'total_debt_amount' => Customer::sum('current_balance'),
 
             // إحصائيات المخزن
             'total_products' => Product::where('is_active', true)->count(),
-            'low_stock_products' => Product::where('cartons_count', '<', 10)->count(),
-            'out_of_stock_products' => Product::where('cartons_count', 0)->count(),
-            'total_inventory_value' => Product::sum(DB::raw('purchase_price * cartons_count')),
+            'low_stock_products' => Product::whereColumn('current_stock', '<=', 'min_stock_level')->count(),
+            'out_of_stock_products' => Product::where('current_stock', '<=', 0)->count(),
+            'total_inventory_value' => Product::sum(DB::raw('purchase_price * current_stock')),
         ];
 
         // آخر الفواتير
-        $recent_invoices = Invoice::with(['representative', 'customer'])
-            ->orderBy('created_at', 'desc')
+        $recent_invoices = Invoice::with(['salesRepresentative', 'customer'])
+            ->orderBy('invoice_date', 'desc')
             ->limit(10)
             ->get();
 
         // أداء المندوبين اليوم
-        $representatives_performance = Representative::with(['invoices' => function($query) {
-                $query->whereDate('created_at', today());
+        $representatives_performance = SalesRepresentative::with(['invoices' => function($query) {
+                $query->whereDate('invoice_date', today());
             }])
             ->where('is_active', true)
             ->get()
@@ -57,7 +57,7 @@ class AdminDashboardController extends Controller
                 $todayInvoices = $rep->invoices;
                 return [
                     'id' => $rep->id,
-                    'name' => $rep->name,
+                    'name' => $rep->name_ar,
                     'phone' => $rep->phone,
                     'invoices_count' => $todayInvoices->count(),
                     'total_sales' => $todayInvoices->sum('total_amount'),
@@ -65,17 +65,17 @@ class AdminDashboardController extends Controller
                 ];
             });
 
-        // المنتجات منخفضة المخزن
-        $low_stock_products = Product::with('supplierType')
-            ->where('cartons_count', '<', 10)
-            ->orderBy('cartons_count', 'asc')
+                // المنتجات منخفضة المخزون
+        $low_stock_products = Product::where('is_active', true)
+            ->whereColumn('current_stock', '<=', 'min_stock_level')
+            ->orderBy('current_stock', 'asc')
             ->limit(10)
             ->get();
 
         // العملاء بأعلى ديون
-        $top_debtors = RepresentativeCustomer::with('representative')
-            ->where('total_debt', '>', 0)
-            ->orderBy('total_debt', 'desc')
+        $top_debtors = Customer::with('salesRepresentative')
+            ->where('current_balance', '>', 0)
+            ->orderBy('current_balance', 'desc')
             ->limit(10)
             ->get();
 
@@ -86,8 +86,8 @@ class AdminDashboardController extends Controller
             $sales_chart[] = [
                 'date' => $date->format('m-d'),
                 'day' => $date->format('D'),
-                'amount' => Invoice::whereDate('created_at', $date)->sum('total_amount'),
-                'count' => Invoice::whereDate('created_at', $date)->count(),
+                'amount' => Invoice::whereDate('invoice_date', $date)->sum('total_amount'),
+                'count' => Invoice::whereDate('invoice_date', $date)->count(),
             ];
         }
 

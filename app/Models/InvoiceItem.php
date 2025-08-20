@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class InvoiceItem extends Model
 {
@@ -12,21 +12,35 @@ class InvoiceItem extends Model
     protected $fillable = [
         'invoice_id',
         'product_id',
-        'cartons_quantity',
-        'units_per_carton',
-        'total_units',
+        'product_code',
+        'product_name',
+        'product_barcode',
+        'quantity',
         'unit_price',
-        'carton_price',
-        'total_price'
+        'discount_percentage',
+        'discount_amount',
+        'tax_rate',
+        'tax_amount',
+        'total_amount',
+        'cost_price',
+        'profit_amount',
+        'commission_rate',
+        'commission_amount',
+        'notes'
     ];
 
     protected $casts = [
-        'cartons_quantity' => 'integer',
-        'units_per_carton' => 'integer',
-        'total_units' => 'integer',
+        'quantity' => 'integer',
         'unit_price' => 'decimal:2',
-        'carton_price' => 'decimal:2',
-        'total_price' => 'decimal:2',
+        'discount_percentage' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'tax_rate' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'profit_amount' => 'decimal:2',
+        'commission_rate' => 'decimal:2',
+        'commission_amount' => 'decimal:2'
     ];
 
     // العلاقات
@@ -38,30 +52,5 @@ class InvoiceItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
-    }
-
-    // Helper methods
-    public function calculateTotalUnits()
-    {
-        return $this->cartons_quantity * $this->units_per_carton;
-    }
-
-    public function calculateTotalPrice()
-    {
-        return $this->cartons_quantity * $this->carton_price;
-    }
-
-    // Boot method للحسابات التلقائية
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::saving(function ($invoiceItem) {
-            // حساب إجمالي القطع
-            $invoiceItem->total_units = $invoiceItem->cartons_quantity * $invoiceItem->units_per_carton;
-
-            // حساب إجمالي السعر
-            $invoiceItem->total_price = $invoiceItem->cartons_quantity * $invoiceItem->carton_price;
-        });
     }
 }

@@ -1,455 +1,364 @@
 {
-  "_AdminLayout-DYBrdYmn.js": {
-    "file": "assets/AdminLayout-DYBrdYmn.js",
+  "_AdminLayout-CBAZUsRv.js": {
+    "file": "assets/AdminLayout-CBAZUsRv.js",
     "name": "AdminLayout",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_DriversLayout-DRm4gOtD.js": {
-    "file": "assets/DriversLayout-DRm4gOtD.js",
+  "_DriversLayout-DQbeGXH8.js": {
+    "file": "assets/DriversLayout-DQbeGXH8.js",
     "name": "DriversLayout",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_RepresentativeLayout-CYzwBndX.js": {
-    "file": "assets/RepresentativeLayout-CYzwBndX.js",
-    "name": "RepresentativeLayout",
+  "_calendar-B5ZOSRYS.js": {
+    "file": "assets/calendar-B5ZOSRYS.js",
+    "name": "calendar",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
+  },
+  "_createLucideIcon-OegKdwhO.js": {
+    "file": "assets/createLucideIcon-OegKdwhO.js",
+    "name": "createLucideIcon",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
-  "_helpers-MsVikwNa.js": {
-    "file": "assets/helpers-MsVikwNa.js",
-    "name": "helpers"
+  "_dollar-sign-C4ryzcvL.js": {
+    "file": "assets/dollar-sign-C4ryzcvL.js",
+    "name": "dollar-sign",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
   },
-  "_index-y56Sslxe.js": {
-    "file": "assets/index-y56Sslxe.js",
+  "_index-BWwmiU41.js": {
+    "file": "assets/index-BWwmiU41.js",
     "name": "index",
     "imports": [
       "resources/js/app.jsx"
     ]
   },
+  "_index-DjG75rFv.js": {
+    "file": "assets/index-DjG75rFv.js",
+    "name": "index",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js",
+      "resources/js/app.jsx"
+    ]
+  },
+  "_plus-EaxzMuIf.js": {
+    "file": "assets/plus-EaxzMuIf.js",
+    "name": "plus",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
+  },
+  "_target-Go6GZXUt.js": {
+    "file": "assets/target-Go6GZXUt.js",
+    "name": "target",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
+  },
+  "_triangle-alert-6oTE0uUT.js": {
+    "file": "assets/triangle-alert-6oTE0uUT.js",
+    "name": "triangle-alert",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
+  },
+  "_user-CWrMXrbC.js": {
+    "file": "assets/user-CWrMXrbC.js",
+    "name": "user",
+    "imports": [
+      "_createLucideIcon-OegKdwhO.js"
+    ]
+  },
   "resources/css/app.css": {
-    "file": "assets/app-BSorVPUw.css",
+    "file": "assets/app-D2X_br3j.js",
+    "name": "app",
     "src": "resources/css/app.css",
     "isEntry": true,
-    "names": [
-      "app.css"
+    "isDynamicEntry": true,
+    "css": [
+      "assets/app-BGTtNlSn.css"
     ]
   },
   "resources/js/Pages/Admin/Dashboard.jsx": {
-    "file": "assets/Dashboard-BdxDWHhX.js",
+    "file": "assets/Dashboard-BfSEVRof.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "_index-BWwmiU41.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Drivers.jsx": {
-    "file": "assets/Drivers-oqTZPe7S.js",
-    "name": "Drivers",
-    "src": "resources/js/Pages/Admin/Drivers.jsx",
+  "resources/js/Pages/Admin/Products/Index.jsx": {
+    "file": "assets/Index-Cnzsbpl5.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Admin/Products/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "_createLucideIcon-OegKdwhO.js",
+      "_plus-EaxzMuIf.js",
+      "_dollar-sign-C4ryzcvL.js",
+      "_triangle-alert-6oTE0uUT.js",
+      "_calendar-B5ZOSRYS.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Invoices.jsx": {
-    "file": "assets/Invoices-DDB8uahM.js",
-    "name": "Invoices",
-    "src": "resources/js/Pages/Admin/Invoices.jsx",
+  "resources/js/Pages/Admin/Products/IndexTable.jsx": {
+    "file": "assets/IndexTable-CZkppcbc.js",
+    "name": "IndexTable",
+    "src": "resources/js/Pages/Admin/Products/IndexTable.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/POS.jsx": {
-    "file": "assets/POS-C_BuNxZK.js",
-    "name": "POS",
-    "src": "resources/js/Pages/Admin/POS.jsx",
+  "resources/js/Pages/Admin/SalesRepresentatives/Index.jsx": {
+    "file": "assets/Index-0L5girEO.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Admin/SalesRepresentatives/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "_index-DjG75rFv.js",
+      "resources/js/Pages/Admin/SalesRepresentatives/Partials/QuickAddForm.jsx",
+      "resources/js/Pages/Admin/SalesRepresentatives/Partials/DetailedForm.jsx",
+      "_triangle-alert-6oTE0uUT.js",
+      "_plus-EaxzMuIf.js",
+      "_createLucideIcon-OegKdwhO.js",
+      "_dollar-sign-C4ryzcvL.js",
+      "_user-CWrMXrbC.js",
+      "resources/css/app.css",
+      "_target-Go6GZXUt.js"
     ]
   },
-  "resources/js/Pages/Admin/Providers.jsx": {
-    "file": "assets/Providers-BiIp6d-P.js",
-    "name": "Providers",
-    "src": "resources/js/Pages/Admin/Providers.jsx",
+  "resources/js/Pages/Admin/SalesRepresentatives/Index_old.jsx": {
+    "file": "assets/Index_old-BDKUauvP.js",
+    "name": "Index_old",
+    "src": "resources/js/Pages/Admin/SalesRepresentatives/Index_old.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Reports.jsx": {
-    "file": "assets/Reports-CTOlPUtz.js",
-    "name": "Reports",
-    "src": "resources/js/Pages/Admin/Reports.jsx",
+  "resources/js/Pages/Admin/SalesRepresentatives/Partials/DetailedForm.jsx": {
+    "file": "assets/DetailedForm-Co9w4u1N.js",
+    "name": "DetailedForm",
+    "src": "resources/js/Pages/Admin/SalesRepresentatives/Partials/DetailedForm.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_index-DjG75rFv.js",
+      "_createLucideIcon-OegKdwhO.js",
+      "_dollar-sign-C4ryzcvL.js",
+      "_target-Go6GZXUt.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Representatives.jsx": {
-    "file": "assets/Representatives-D9RXH395.js",
-    "name": "Representatives",
-    "src": "resources/js/Pages/Admin/Representatives.jsx",
+  "resources/js/Pages/Admin/SalesRepresentatives/Partials/QuickAddForm.jsx": {
+    "file": "assets/QuickAddForm-QfPSIRvh.js",
+    "name": "QuickAddForm",
+    "src": "resources/js/Pages/Admin/SalesRepresentatives/Partials/QuickAddForm.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_index-DjG75rFv.js",
+      "_plus-EaxzMuIf.js",
+      "_user-CWrMXrbC.js",
+      "resources/css/app.css",
+      "_createLucideIcon-OegKdwhO.js"
     ]
   },
-  "resources/js/Pages/Admin/Representatives/Customers.jsx": {
-    "file": "assets/Customers-pBGZCWM9.js",
-    "name": "Customers",
-    "src": "resources/js/Pages/Admin/Representatives/Customers.jsx",
+  "resources/js/Pages/Admin/SalesRepresentatives/Partials/RepresentativeForm.jsx": {
+    "file": "assets/RepresentativeForm-BTpg6A_v.js",
+    "name": "RepresentativeForm",
+    "src": "resources/js/Pages/Admin/SalesRepresentatives/Partials/RepresentativeForm.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_index-DjG75rFv.js",
+      "_user-CWrMXrbC.js",
+      "_target-Go6GZXUt.js",
+      "_createLucideIcon-OegKdwhO.js",
+      "_calendar-B5ZOSRYS.js",
+      "_dollar-sign-C4ryzcvL.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Representatives/Management.jsx": {
-    "file": "assets/Management-B5Lw_tOG.js",
-    "name": "Management",
-    "src": "resources/js/Pages/Admin/Representatives/Management.jsx",
+  "resources/js/Pages/Admin/SupplierCategories/Index.jsx": {
+    "file": "assets/Index-acUaESeo.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Admin/SupplierCategories/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "resources/css/app.css"
     ]
   },
-  "resources/js/Pages/Admin/Settings.jsx": {
-    "file": "assets/Settings-m3r_7geS.js",
-    "name": "Settings",
-    "src": "resources/js/Pages/Admin/Settings.jsx",
+  "resources/js/Pages/Admin/Suppliers/Index.jsx": {
+    "file": "assets/Index-C4ULcnOz.js",
+    "name": "Index",
+    "src": "resources/js/Pages/Admin/Suppliers/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/Admin/Suppliers.jsx": {
-    "file": "assets/Suppliers-DmV341bP.js",
-    "name": "Suppliers",
-    "src": "resources/js/Pages/Admin/Suppliers.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/Admin/Warehouse.jsx": {
-    "file": "assets/Warehouse-CDuBSPo6.js",
-    "name": "Warehouse",
-    "src": "resources/js/Pages/Admin/Warehouse.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_AdminLayout-DYBrdYmn.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_AdminLayout-CBAZUsRv.js",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Auth/AdminLogin.jsx": {
-    "file": "assets/AdminLogin-iQaZxCzh.js",
+    "file": "assets/AdminLogin-DNxSu6vy.js",
     "name": "AdminLogin",
     "src": "resources/js/Pages/Auth/AdminLogin.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Auth/DriverLogin.jsx": {
-    "file": "assets/DriverLogin-CASDvB4i.js",
+    "file": "assets/DriverLogin-DX_X9t8g.js",
     "name": "DriverLogin",
     "src": "resources/js/Pages/Auth/DriverLogin.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Auth/RepresentativeLogin.jsx": {
-    "file": "assets/RepresentativeLogin-KEJfkoVj.js",
+    "file": "assets/RepresentativeLogin-woHeUfRm.js",
     "name": "RepresentativeLogin",
     "src": "resources/js/Pages/Auth/RepresentativeLogin.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Auth/SupplierLogin.jsx": {
-    "file": "assets/SupplierLogin-BNJEIYuM.js",
+    "file": "assets/SupplierLogin-B_76kGtr.js",
     "name": "SupplierLogin",
     "src": "resources/js/Pages/Auth/SupplierLogin.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Customers/OrderConfirmation.jsx": {
-    "file": "assets/OrderConfirmation-C2kJldSy.js",
+    "file": "assets/OrderConfirmation-Sn35eE8T.js",
     "name": "OrderConfirmation",
     "src": "resources/js/Pages/Customers/OrderConfirmation.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/DriversPanel/Dashboard.jsx": {
-    "file": "assets/Dashboard-LRAp0-Vp.js",
+    "file": "assets/Dashboard-CXKd362d.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/DriversPanel/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_DriversLayout-DRm4gOtD.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_DriversLayout-DQbeGXH8.js",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/DriversPanel/Deliveries.jsx": {
-    "file": "assets/Deliveries-MG83pnVi.js",
+    "file": "assets/Deliveries-Br_PAYCg.js",
     "name": "Deliveries",
     "src": "resources/js/Pages/DriversPanel/Deliveries.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_DriversLayout-DRm4gOtD.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_DriversLayout-DQbeGXH8.js",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/Landing.jsx": {
-    "file": "assets/Landing-BHgTbb3a.js",
+    "file": "assets/Landing-BSc52-VH.js",
     "name": "Landing",
     "src": "resources/js/Pages/Landing.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/CustomerCreate.jsx": {
-    "file": "assets/CustomerCreate-c1A5bv4U.js",
-    "name": "CustomerCreate",
-    "src": "resources/js/Pages/RepresentativesPanel/CustomerCreate.jsx",
-    "isDynamicEntry": true,
-    "imports": [
       "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/Customers.jsx": {
-    "file": "assets/Customers-DxiwQ4Tg.js",
-    "name": "Customers",
-    "src": "resources/js/Pages/RepresentativesPanel/Customers.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/RepresentativesPanel/Dashboard.jsx": {
-    "file": "assets/Dashboard-Bhy23KDa.js",
+    "file": "assets/Dashboard-DbJq7UvD.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/RepresentativesPanel/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/Invoices/Index.jsx": {
-    "file": "assets/Index-YLCWbMQh.js",
-    "name": "Index",
-    "src": "resources/js/Pages/RepresentativesPanel/Invoices/Index.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_helpers-MsVikwNa.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/Invoices/Show.jsx": {
-    "file": "assets/Show-AnzQe3qG.js",
-    "name": "Show",
-    "src": "resources/js/Pages/RepresentativesPanel/Invoices/Show.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_helpers-MsVikwNa.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "_index-BWwmiU41.js",
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/RepresentativesPanel/Login.jsx": {
-    "file": "assets/Login-RedwhJVc.js",
+    "file": "assets/Login-CQFP-TyB.js",
     "name": "Login",
     "src": "resources/js/Pages/RepresentativesPanel/Login.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/Orders.jsx": {
-    "file": "assets/Orders-DYrIK_Rc.js",
-    "name": "Orders",
-    "src": "resources/js/Pages/RepresentativesPanel/Orders.jsx",
-    "isDynamicEntry": true,
-    "imports": [
       "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/POS/CreateInvoice.jsx": {
-    "file": "assets/CreateInvoice-DQrpq58Z.js",
-    "name": "CreateInvoice",
-    "src": "resources/js/Pages/RepresentativesPanel/POS/CreateInvoice.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_helpers-MsVikwNa.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
-    ]
-  },
-  "resources/js/Pages/RepresentativesPanel/POS/CreateInvoiceNew.jsx": {
-    "file": "assets/CreateInvoiceNew-CEY1CPrH.js",
-    "name": "CreateInvoiceNew",
-    "src": "resources/js/Pages/RepresentativesPanel/POS/CreateInvoiceNew.jsx",
-    "isDynamicEntry": true,
-    "imports": [
-      "resources/js/app.jsx",
-      "_RepresentativeLayout-CYzwBndX.js",
-      "_helpers-MsVikwNa.js",
-      "_index-y56Sslxe.js"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/css/app.css"
     ]
   },
   "resources/js/Pages/SuppliersPanel/Dashboard.jsx": {
-    "file": "assets/Dashboard-BR2LiabV.js",
+    "file": "assets/Dashboard-D33rx_um.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/SuppliersPanel/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
-      "resources/js/app.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
+      "resources/js/app.jsx",
+      "resources/css/app.css"
     ]
   },
   "resources/js/app.jsx": {
-    "file": "assets/app-DjANfjSe.js",
+    "file": "assets/app-C7cjIxtJ.js",
     "name": "app",
     "src": "resources/js/app.jsx",
     "isEntry": true,
+    "imports": [
+      "resources/css/app.css"
+    ],
     "dynamicImports": [
       "resources/js/Pages/Admin/Dashboard.jsx",
-      "resources/js/Pages/Admin/Drivers.jsx",
-      "resources/js/Pages/Admin/Invoices.jsx",
-      "resources/js/Pages/Admin/POS.jsx",
-      "resources/js/Pages/Admin/Providers.jsx",
-      "resources/js/Pages/Admin/Reports.jsx",
-      "resources/js/Pages/Admin/Representatives.jsx",
-      "resources/js/Pages/Admin/Representatives/Customers.jsx",
-      "resources/js/Pages/Admin/Representatives/Management.jsx",
-      "resources/js/Pages/Admin/Settings.jsx",
-      "resources/js/Pages/Admin/Suppliers.jsx",
-      "resources/js/Pages/Admin/Warehouse.jsx",
+      "resources/css/app.css",
+      "resources/js/Pages/Admin/Products/Index.jsx",
+      "resources/js/Pages/Admin/Products/IndexTable.jsx",
+      "resources/css/app.css",
+      "resources/css/app.css",
+      "resources/js/Pages/Admin/SalesRepresentatives/Index.jsx",
+      "resources/js/Pages/Admin/SalesRepresentatives/Index_old.jsx",
+      "resources/js/Pages/Admin/SalesRepresentatives/Partials/DetailedForm.jsx",
+      "resources/js/Pages/Admin/SalesRepresentatives/Partials/QuickAddForm.jsx",
+      "resources/js/Pages/Admin/SalesRepresentatives/Partials/RepresentativeForm.jsx",
+      "resources/js/Pages/Admin/SupplierCategories/Index.jsx",
+      "resources/js/Pages/Admin/Suppliers/Index.jsx",
+      "resources/css/app.css",
       "resources/js/Pages/Auth/AdminLogin.jsx",
       "resources/js/Pages/Auth/DriverLogin.jsx",
       "resources/js/Pages/Auth/RepresentativeLogin.jsx",
@@ -458,19 +367,9 @@
       "resources/js/Pages/DriversPanel/Dashboard.jsx",
       "resources/js/Pages/DriversPanel/Deliveries.jsx",
       "resources/js/Pages/Landing.jsx",
-      "resources/js/Pages/RepresentativesPanel/CustomerCreate.jsx",
-      "resources/js/Pages/RepresentativesPanel/Customers.jsx",
       "resources/js/Pages/RepresentativesPanel/Dashboard.jsx",
-      "resources/js/Pages/RepresentativesPanel/Invoices/Index.jsx",
-      "resources/js/Pages/RepresentativesPanel/Invoices/Show.jsx",
       "resources/js/Pages/RepresentativesPanel/Login.jsx",
-      "resources/js/Pages/RepresentativesPanel/Orders.jsx",
-      "resources/js/Pages/RepresentativesPanel/POS/CreateInvoice.jsx",
-      "resources/js/Pages/RepresentativesPanel/POS/CreateInvoiceNew.jsx",
       "resources/js/Pages/SuppliersPanel/Dashboard.jsx"
-    ],
-    "css": [
-      "assets/app-BSorVPUw.css"
     ]
   }
 }
