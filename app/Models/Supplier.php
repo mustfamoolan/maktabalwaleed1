@@ -108,6 +108,14 @@ class Supplier extends Model
     }
 
     /**
+     * الحصول على الاسم (accessor للتوافق)
+     */
+    public function getNameAttribute()
+    {
+        return $this->name_ar ?: $this->name_en;
+    }
+
+    /**
      * Scope للموردين حسب الفئة
      */
     public function scopeByCategory($query, $categoryId)

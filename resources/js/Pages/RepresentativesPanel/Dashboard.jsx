@@ -9,7 +9,9 @@ import {
     FaChartLine,
     FaCog,
     FaClipboardList,
-    FaMapMarkerAlt
+    FaMapMarkerAlt,
+    FaBullseye,
+    FaWallet
 } from 'react-icons/fa';
 
 const Dashboard = ({ representative_user, customers = [], statistics = {} }) => {
@@ -31,10 +33,10 @@ const Dashboard = ({ representative_user, customers = [], statistics = {} }) => 
             iconColor: 'bg-green-500'
         },
         {
-            title: 'نقاط البيع',
-            description: 'إنشاء فاتورة جديدة للعميل',
+            title: 'نقطة البيع',
+            description: 'نظام نقطة البيع والفواتير',
             icon: <FaFileInvoiceDollar />,
-            href: '/representatives/pos/create',
+            href: '/representatives/pos',
             bgColor: 'bg-gradient-to-br from-emerald-100 to-emerald-200',
             iconColor: 'bg-emerald-500'
         },
@@ -61,6 +63,22 @@ const Dashboard = ({ representative_user, customers = [], statistics = {} }) => 
             href: '/representatives/payments',
             bgColor: 'bg-gradient-to-br from-yellow-100 to-yellow-200',
             iconColor: 'bg-yellow-500'
+        },
+        {
+            title: 'الأهداف',
+            description: 'متابعة الأهداف والخطط',
+            icon: <FaBullseye />,
+            href: '/representatives/targets',
+            bgColor: 'bg-gradient-to-br from-red-100 to-red-200',
+            iconColor: 'bg-red-500'
+        },
+        {
+            title: 'الراتب والاستحقاقات',
+            description: 'عرض الراتب والإنجاز المحقق',
+            icon: <FaWallet />,
+            href: '/representatives/salary',
+            bgColor: 'bg-gradient-to-br from-teal-100 to-teal-200',
+            iconColor: 'bg-teal-500'
         },
         {
             title: 'التقارير',
@@ -93,20 +111,20 @@ const Dashboard = ({ representative_user, customers = [], statistics = {} }) => 
                             <Link
                                 key={index}
                                 href={action.href}
-                                className="group relative bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:border-gray-300"
+                                className="group relative bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:border-gray-300 aspect-square flex flex-col items-center justify-center text-center"
                             >
                                 <div className={`${action.bgColor} rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-200`}>
                                     <div className={`${action.iconColor} rounded-full w-12 h-12 flex items-center justify-center text-white text-xl`}>
                                         {action.icon}
                                     </div>
                                 </div>
-                                <div className="text-center">
-                                    <h3 className="font-medium text-gray-900 mb-1">{action.title}</h3>
-                                    <p className="text-sm text-gray-600 leading-tight">{action.description}</p>
+                                <div>
+                                    <h3 className="font-medium text-gray-900 mb-1 text-sm">{action.title}</h3>
+                                    <p className="text-xs text-gray-600 leading-tight">{action.description}</p>
                                 </div>
 
                                 {/* مؤشر الهوفر */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                             </Link>
                         ))}
                     </div>

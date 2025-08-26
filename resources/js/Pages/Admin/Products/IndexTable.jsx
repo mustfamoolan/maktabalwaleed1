@@ -14,6 +14,29 @@ export default function IndexTable({ products, suppliers, categories, productCat
     const [newRowsCount, setNewRowsCount] = useState(0);
     const [savingRows, setSavingRows] = useState({});
     const [showAddModal, setShowAddModal] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [editingProductId, setEditingProductId] = useState(null);
+    const [currentImage, setCurrentImage] = useState(null);
+    const [selectedSupplierInModal, setSelectedSupplierInModal] = useState('');
+    const [modalData, setModalData] = useState({
+        name_ar: '',
+        name_en: '',
+        description: '',
+        supplier_id: '',
+        category_id: '',
+        barcode: '',
+        barcode_type: 'auto',
+        cost_price: '',
+        purchase_price: '',
+        selling_price: '',
+        wholesale_price: '',
+        stock_quantity: '0',
+        min_stock_level: '1',
+        expiry_date: '',
+        image: null,
+        is_active: true
+    });
+    const [modalSaving, setModalSaving] = useState(false);
 
     // إنشاء بيانات فارغة لصف جديد
     const createEmptyRow = (tempId) => ({
@@ -37,21 +60,161 @@ export default function IndexTable({ products, suppliers, categories, productCat
         isNew: true
     });
 
-    // إضافة صف جديد
+    // إضافة صف جديد - فتح النافذة المنسدلة فقط
     const addNewRow = () => {
+        setIsEditMode(false);
+        setEditingProductId(null);
+        setCurrentImage(null);
+        setSelectedSupplierInModal('');
+        // تصفير بيانات النموذج للإضافة الجديدة
+        setModalData({
+            name_ar: '',
+            name_en: '',
+            description: '',
+            supplier_id: '',
+            category_id: '',
+            barcode: '',
+            barcode_type: 'auto',
+            cost_price: '',
+            purchase_price: '',
+            selling_price: '',
+            wholesale_price: '',
+            stock_quantity: '0',
+            min_stock_level: '1',
+            expiry_date: '',
+            image: null,
+            is_active: true
+        });
         setShowAddModal(true);
     };
 
-    // إنشاء منتج جديد من النافذة المنسدلة
-    const createNewProduct = () => {
-        const tempId = `new_${Date.now()}_${newRowsCount}`;
-        const newRow = createEmptyRow(tempId);
-        setEditingRows(prev => ({
-            ...prev,
-            [tempId]: newRow
-        }));
-        setNewRowsCount(prev => prev + 1);
+    // فتح النافذة للتعديل
+    const openEditModal = (product) => {
+        setIsEditMode(true);
+        setEditingProductId(product.id);
+        setSelectedSupplierInModal(product.supplier_id);
+        setCurrentImage(product.image); // حفظ مسار الصورة الحالية
+        setModalData({
+            name_ar: product.name_ar || '',
+            name_en: product.name_en || '',
+            description: product.description || '',
+            supplier_id: product.supplier_id || '',
+            category_id: product.category_id || '',
+            barcode: product.barcode || '',
+            barcode_type: product.barcode_type || 'auto',
+            cost_price: product.cost_price || '',
+            purchase_price: product.purchase_price || '',
+            selling_price: product.selling_price || '',
+            wholesale_price: product.wholesale_price || '',
+            stock_quantity: product.stock_quantity || '0',
+            min_stock_level: product.min_stock_level || '1',
+            expiry_date: product.expiry_date || '',
+            image: null, // الصورة الجديدة إن وُجدت
+            is_active: product.is_active
+        });
+        setShowAddModal(true);
+    };
+
+    // حفظ المنتج (إضافة أو تعديل)
+    const saveProduct = async () => {
+        if (!modalData.name_ar || !modalData.supplier_id || !modalData.purchase_price || !modalData.selling_price) {
+            alert('يرجى ملء الحقول المطلوبة (اسم المنتج، المورد، سعر الشراء، سعر البيع)');
+            return;
+        }
+
+        setModalSaving(true);
+
+        try {
+            if (isEditMode && editingProductId) {
+                // تعديل منتج موجود
+                router.put(route('admin.products.update', editingProductId), modalData, {
+                    onSuccess: () => {
+                        closeModal();
+                    },
+                    onError: (errors) => {
+                        console.error('أخطاء التعديل:', errors);
+                        alert('حدث خطأ أثناء تعديل المنتج: ' + Object.values(errors).join(', '));
+                    },
+                    onFinish: () => {
+                        setModalSaving(false);
+                    }
+                });
+            } else {
+                // إضافة منتج جديد
+                router.post(route('admin.products.store'), modalData, {
+                    onSuccess: () => {
+                        closeModal();
+                    },
+                    onError: (errors) => {
+                        console.error('أخطاء الحفظ:', errors);
+                        alert('حدث خطأ أثناء حفظ المنتج: ' + Object.values(errors).join(', '));
+                    },
+                    onFinish: () => {
+                        setModalSaving(false);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('خطأ في الحفظ:', error);
+            alert('حدث خطأ أثناء حفظ المنتج');
+            setModalSaving(false);
+        }
+    };
+
+    // إغلاق النافذة المنسدلة وإعادة تعيين البيانات
+    const closeModal = () => {
         setShowAddModal(false);
+        setIsEditMode(false);
+        setEditingProductId(null);
+        setCurrentImage(null);
+        setSelectedSupplierInModal('');
+        setModalData({
+            name_ar: '',
+            name_en: '',
+            description: '',
+            supplier_id: '',
+            category_id: '',
+            barcode: '',
+            barcode_type: 'auto',
+            cost_price: '',
+            purchase_price: '',
+            selling_price: '',
+            wholesale_price: '',
+            stock_quantity: '0',
+            min_stock_level: '1',
+            expiry_date: '',
+            image: null,
+            is_active: true
+        });
+    };
+
+    // فلترة فئات المنتجات بناءً على المورد المختار
+    const getFilteredProductCategories = () => {
+        if (!selectedSupplierInModal) {
+            console.log('لم يتم اختيار مورد في النافذة المنسدلة');
+            return []; // إذا لم يتم اختيار مورد، لا تظهر أي فئات
+        }
+
+        const selectedSupplier = suppliers.find(supplier => supplier.id == selectedSupplierInModal);
+        if (!selectedSupplier) {
+            console.log('لم يتم العثور على المورد في النافذة المنسدلة:', selectedSupplierInModal);
+            return [];
+        }
+
+        // تجربة مسارات مختلفة للعثور على فئات المورد
+        console.log('المورد المختار في النافذة المنسدلة:', selectedSupplier);
+        console.log('فئات المورد - all_categories:', selectedSupplier.all_categories);
+        console.log('فئات المورد - categories:', selectedSupplier.categories);
+        console.log('فئات المورد - supplier_categories:', selectedSupplier.supplier_categories);
+
+        // إرجاع فئات المورد - تجربة مسارات مختلفة
+        const categories = selectedSupplier.all_categories ||
+                          selectedSupplier.categories ||
+                          selectedSupplier.supplier_categories ||
+                          [];
+
+        console.log('الفئات المرجعة في النافذة المنسدلة:', categories);
+        return categories;
     };
 
     // تحديث قيمة في الصف مع منع القطع في الإدخال
@@ -114,12 +277,28 @@ export default function IndexTable({ products, suppliers, categories, productCat
 
         // إضافة البيانات للـ FormData
         Object.keys(rowData).forEach(key => {
-            if (key !== 'isNew' && key !== 'imagePreview' && rowData[key] !== null && rowData[key] !== undefined && rowData[key] !== '') {
+            if (key !== 'isNew' && key !== 'imagePreview' && rowData[key] !== null && rowData[key] !== undefined) {
                 if (key === 'image') {
                     // إرسال الصورة فقط إذا كانت ملف جديد
                     if (rowData[key] instanceof File) {
-                        formData.append(key, rowData[key]);
-                        console.log('إرسال صورة جديدة:', rowData[key].name);
+                        // تحقق إضافي من خصائص الملف
+                        console.log('تفاصيل الملف قبل الإرسال:', {
+                            name: rowData[key].name,
+                            size: rowData[key].size,
+                            type: rowData[key].type,
+                            lastModified: rowData[key].lastModified
+                        });
+
+                        // إنشاء ملف جديد مع تأكيد النوع
+                        const file = new File([rowData[key]], rowData[key].name, {
+                            type: rowData[key].type,
+                            lastModified: rowData[key].lastModified
+                        });
+
+                        formData.append(key, file);
+                        console.log('إرسال صورة جديدة:', file.name);
+                    } else {
+                        console.log('تجاهل الصورة القديمة:', rowData[key]);
                     }
                     // تجاهل الصورة القديمة (string path) لأنها موجودة أصلاً
                 } else if (key === 'is_active') {
@@ -130,37 +309,6 @@ export default function IndexTable({ products, suppliers, categories, productCat
                 }
             }
         });
-
-        // التأكد من وجود البيانات المطلوبة
-        if (!formData.get('name_ar')) {
-            alert('اسم المنتج بالعربية مطلوب');
-            setSavingRows(prev => {
-                const newSaving = { ...prev };
-                delete newSaving[rowId];
-                return newSaving;
-            });
-            return;
-        }
-
-        if (!formData.get('supplier_id')) {
-            alert('المورد مطلوب');
-            setSavingRows(prev => {
-                const newSaving = { ...prev };
-                delete newSaving[rowId];
-                return newSaving;
-            });
-            return;
-        }
-
-        if (!formData.get('purchase_price') || !formData.get('selling_price')) {
-            alert('سعر الشراء وسعر البيع مطلوبان');
-            setSavingRows(prev => {
-                const newSaving = { ...prev };
-                delete newSaving[rowId];
-                return newSaving;
-            });
-            return;
-        }
 
         // Debug: طباعة محتويات FormData
         console.log('محتويات FormData:');
@@ -254,18 +402,9 @@ export default function IndexTable({ products, suppliers, categories, productCat
         });
     };
 
-    // بدء تعديل صف موجود
+    // بدء تعديل صف موجود - استخدام النافذة المنسدلة
     const startEdit = (product) => {
-        setEditingRows(prev => ({
-            ...prev,
-            [product.id]: {
-                ...product,
-                category_id: product.category_id || '',
-                image: null, // تأكد من أن الصورة null (لا ترسل الصورة القديمة)
-                imagePreview: product.image ? `/storage/${product.image}` : null,
-                isNew: false
-            }
-        }));
+        openEditModal(product);
     };
 
     // حذف منتج
@@ -298,11 +437,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
         return matchesSearch && matchesSupplier && matchesCategory && matchesProductCategory && matchesStatus && matchesStock;
     });
 
-    // دمج المنتجات مع الصفوف الجديدة للعرض
-    const allRows = [
-        ...filteredProducts,
-        ...Object.values(editingRows).filter(row => row.isNew)
-    ];
+    // عرض المنتجات المفلترة فقط (إزالة نظام الإضافة المباشرة)
+    const allRows = filteredProducts;
 
     // تنسيق السعر بالدينار العراقي
     const formatPrice = (price) => {
@@ -496,9 +632,14 @@ export default function IndexTable({ products, suppliers, categories, productCat
                         {/* Modal Header */}
                         <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-blue-50">
                             <div className="flex justify-between items-center">
-                                <h2 className="text-lg sm:text-xl font-bold text-gray-900">إضافة منتج جديد</h2>
+                                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                                    {isEditMode ? 'تعديل المنتج' : 'إضافة منتج جديد'}
+                                </h2>
                                 <button
-                                    onClick={() => setShowAddModal(false)}
+                                    onClick={() => {
+                                        setShowAddModal(false);
+                                        setSelectedSupplierInModal('');
+                                    }}
                                     className="text-gray-400 hover:text-gray-600 text-2xl"
                                 >
                                     ×
@@ -517,6 +658,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                         <label className="block text-sm font-medium text-gray-700 mb-2">اسم المنتج (عربي) *</label>
                                         <input
                                             type="text"
+                                            value={modalData.name_ar}
+                                            onChange={(e) => setModalData(prev => ({...prev, name_ar: e.target.value}))}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                             placeholder="أدخل اسم المنتج بالعربية"
                                         />
@@ -526,6 +669,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                         <label className="block text-sm font-medium text-gray-700 mb-2">اسم المنتج (إنجليزي)</label>
                                         <input
                                             type="text"
+                                            value={modalData.name_en}
+                                            onChange={(e) => setModalData(prev => ({...prev, name_en: e.target.value}))}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                             placeholder="Product Name (English)"
                                         />
@@ -535,6 +680,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                         <label className="block text-sm font-medium text-gray-700 mb-2">الوصف</label>
                                         <textarea
                                             rows="3"
+                                            value={modalData.description}
+                                            onChange={(e) => setModalData(prev => ({...prev, description: e.target.value}))}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                             placeholder="وصف المنتج (اختياري)"
                                         ></textarea>
@@ -542,6 +689,24 @@ export default function IndexTable({ products, suppliers, categories, productCat
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">صورة المنتج</label>
+
+                                        {/* عرض الصورة الحالية في وضع التعديل */}
+                                        {isEditMode && currentImage && (
+                                            <div className="mb-4">
+                                                <p className="text-sm text-gray-600 mb-2">الصورة الحالية:</p>
+                                                <div className="relative inline-block">
+                                                    <img
+                                                        src={`/storage/${currentImage}`}
+                                                        alt="الصورة الحالية"
+                                                        className="w-24 h-24 object-cover rounded-lg border"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black bg-opacity-40 rounded-lg flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                                        <span className="text-white text-xs">الصورة الحالية</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
                                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 transition-colors">
                                             <svg className="mx-auto h-8 sm:h-12 w-8 sm:w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                                                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -549,12 +714,20 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <div className="mt-2">
                                                 <label className="cursor-pointer">
                                                     <span className="mt-2 block text-xs sm:text-sm font-medium text-gray-900">
-                                                        اضغط لرفع صورة أو اسحب الصورة هنا
+                                                        {isEditMode ? 'اضغط لتغيير الصورة' : 'اضغط لرفع صورة أو اسحب الصورة هنا'}
                                                     </span>
-                                                    <input type="file" className="hidden" accept="image/*" />
+                                                    <input
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        onChange={(e) => setModalData(prev => ({...prev, image: e.target.files[0]}))}
+                                                    />
                                                 </label>
                                             </div>
-                                            <p className="mt-1 text-xs text-gray-500">PNG, JPG, GIF حتى 5MB</p>
+                                            <p className="mt-1 text-xs text-gray-500">
+                                                {isEditMode ? 'اترك فارغاً للاحتفاظ بالصورة الحالية • ' : ''}
+                                                PNG, JPG, GIF حتى 5MB
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -566,7 +739,15 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">المورد *</label>
-                                            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                                            <select
+                                                value={selectedSupplierInModal}
+                                                onChange={(e) => {
+                                                    const supplierId = e.target.value;
+                                                    setSelectedSupplierInModal(supplierId);
+                                                    setModalData(prev => ({...prev, supplier_id: supplierId, category_id: ''}));
+                                                }}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                            >
                                                 <option value="">اختر المورد</option>
                                                 {suppliers.map(supplier => (
                                                     <option key={supplier.id} value={supplier.id}>
@@ -578,26 +759,51 @@ export default function IndexTable({ products, suppliers, categories, productCat
 
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">فئة المنتج</label>
-                                            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                                <option value="">اختر الفئة</option>
-                                                {productCategories.map(category => (
+                                            <select
+                                                value={modalData.category_id}
+                                                onChange={(e) => setModalData(prev => ({...prev, category_id: e.target.value}))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                disabled={!selectedSupplierInModal}
+                                            >
+                                                <option value="">
+                                                    {selectedSupplierInModal ? "اختر الفئة" : "اختر المورد أولاً"}
+                                                </option>
+                                                {/* فئات المورد المختار */}
+                                                {getFilteredProductCategories().map(category => (
                                                     <option key={category.id} value={category.id}>
                                                         {category.name_ar}
                                                     </option>
                                                 ))}
+                                                {/* إذا لم توجد فئات للمورد، اعرض جميع الفئات كـ fallback */}
+                                                {selectedSupplierInModal && getFilteredProductCategories().length === 0 &&
+                                                 productCategories.map(category => (
+                                                    <option key={`fallback_${category.id}`} value={category.id}>
+                                                        {category.name_ar} (عام)
+                                                    </option>
+                                                ))}
                                             </select>
+                                            {selectedSupplierInModal && getFilteredProductCategories().length === 0 && productCategories.length > 0 && (
+                                                <p className="mt-1 text-xs text-blue-600">
+                                                    تم عرض جميع الفئات (المورد ليس له فئات محددة)
+                                                </p>
+                                            )}
+                                            {selectedSupplierInModal && getFilteredProductCategories().length === 0 && productCategories.length === 0 && (
+                                                <p className="mt-1 text-xs text-amber-600">
+                                                    لا توجد فئات منتجات متاحة
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
                                     {/* نظام الباركود المتقدم */}
                                     <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                                         <BarcodeManager
-                                            value=""
-                                            onChange={() => {}}
+                                            value={modalData.barcode}
+                                            onChange={(barcode) => setModalData(prev => ({...prev, barcode}))}
                                             showGenerator={true}
                                             showScanner={true}
-                                            generateAutomatic={true}
-                                            label="نظام الباركود المتقدم"
+                                            generateAutomatic={!isEditMode} // توليد تلقائي فقط للمنتجات الجديدة
+                                            label={isEditMode ? `الباركود الحالي: ${modalData.barcode || 'غير محدد'}` : "نظام الباركود المتقدم"}
                                         />
                                     </div>
 
@@ -607,6 +813,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <input
                                                 type="number"
                                                 step="0.01"
+                                                value={modalData.purchase_price}
+                                                onChange={(e) => setModalData(prev => ({...prev, purchase_price: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                 placeholder="0.00"
                                             />
@@ -617,6 +825,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <input
                                                 type="number"
                                                 step="0.01"
+                                                value={modalData.selling_price}
+                                                onChange={(e) => setModalData(prev => ({...prev, selling_price: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                 placeholder="0.00"
                                             />
@@ -627,6 +837,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <input
                                                 type="number"
                                                 step="0.01"
+                                                value={modalData.wholesale_price}
+                                                onChange={(e) => setModalData(prev => ({...prev, wholesale_price: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                 placeholder="0.00"
                                             />
@@ -638,9 +850,10 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <label className="block text-sm font-medium text-gray-700 mb-2">كمية المخزون</label>
                                             <input
                                                 type="number"
+                                                value={modalData.stock_quantity}
+                                                onChange={(e) => setModalData(prev => ({...prev, stock_quantity: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                 placeholder="0"
-                                                defaultValue="0"
                                             />
                                         </div>
 
@@ -648,9 +861,10 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <label className="block text-sm font-medium text-gray-700 mb-2">الحد الأدنى</label>
                                             <input
                                                 type="number"
+                                                value={modalData.min_stock_level}
+                                                onChange={(e) => setModalData(prev => ({...prev, min_stock_level: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                                 placeholder="1"
-                                                defaultValue="1"
                                             />
                                         </div>
 
@@ -658,6 +872,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                             <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ الصلاحية</label>
                                             <input
                                                 type="date"
+                                                value={modalData.expiry_date}
+                                                onChange={(e) => setModalData(prev => ({...prev, expiry_date: e.target.value}))}
                                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                                             />
                                         </div>
@@ -665,9 +881,13 @@ export default function IndexTable({ products, suppliers, categories, productCat
 
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">حالة المنتج</label>
-                                        <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
-                                            <option value="true">نشط</option>
-                                            <option value="false">غير نشط</option>
+                                        <select
+                                            value={modalData.is_active}
+                                            onChange={(e) => setModalData(prev => ({...prev, is_active: e.target.value}))}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                        >
+                                            <option value={true}>نشط</option>
+                                            <option value={false}>غير نشط</option>
                                         </select>
                                     </div>
                                 </div>
@@ -677,19 +897,33 @@ export default function IndexTable({ products, suppliers, categories, productCat
                         {/* Modal Footer */}
                         <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-end gap-3">
                             <button
-                                onClick={() => setShowAddModal(false)}
+                                onClick={closeModal}
                                 className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                             >
                                 إلغاء
                             </button>
                             <button
-                                onClick={createNewProduct}
-                                className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+                                onClick={saveProduct}
+                                disabled={modalSaving}
+                                className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50"
                             >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                                </svg>
-                                إضافة المنتج
+                                {modalSaving ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        {isEditMode ? 'جار التعديل...' : 'جار الحفظ...'}
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            {isEditMode ? (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            ) : (
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                            )}
+                                        </svg>
+                                        {isEditMode ? 'تعديل المنتج' : 'إضافة المنتج'}
+                                    </>
+                                )}
                             </button>
                         </div>
                     </div>

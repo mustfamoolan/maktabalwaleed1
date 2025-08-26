@@ -63,9 +63,9 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
         },
         {
             name: 'المندوبين',
-            href: '/admin/sales-representatives',
+            href: '/admin/representatives',
             icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
-            description: 'إدارة فريق المبيعات'
+            description: 'إدارة فريق المبيعات والرواتب والخطط'
         },
         {
             name: 'العملاء',
@@ -119,11 +119,6 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
         }
     };
 
-    const getCurrentPageInfo = () => {
-        const currentItem = navigation.find(item => url.startsWith(item.href));
-        return currentItem || navigation[0];
-    };
-
     const formatTime = (date) => {
         return date.toLocaleTimeString('ar-SA', {
             hour12: false,
@@ -173,7 +168,9 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
                                     <h1 className="text-xs sm:text-sm font-semibold text-gray-900">
                                         DubaiExchange - {user?.name || 'المقر الرئيسي'}
                                     </h1>
-                                    <p className="text-xs text-gray-500 hidden sm:block">{getCurrentPageInfo().name}</p>
+                                    <p className="text-xs text-gray-500 hidden sm:block">
+                                        {navigation.find(item => url.startsWith(item.href))?.name || 'الرئيسية'}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -363,37 +360,9 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
                 {/* Main Content */}
                 <main className="flex-1 overflow-hidden">
                     <div className="h-full overflow-y-auto">
-                        <div className="p-3 sm:p-4 md:p-6 lg:p-8">
-                            {/* Page Header */}
-                            <div className="mb-4 md:mb-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center space-x-3 space-x-reverse">
-                                        <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
-                                            <svg className="w-4 h-4 md:w-5 md:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={getCurrentPageInfo().icon} />
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h1 className="text-lg md:text-xl font-bold text-gray-900">{getCurrentPageInfo().name}</h1>
-                                            <p className="text-xs md:text-sm text-gray-500 hidden sm:block">{getCurrentPageInfo().description}</p>
-                                        </div>
-                                    </div>
-
-                                    {/* Mobile Search */}
-                                    <button className="md:hidden p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all duration-200">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Page Content */}
-                            <div className="bg-white rounded-lg md:rounded-xl shadow-sm border border-gray-200 min-h-[calc(100vh-180px)] md:min-h-[calc(100vh-200px)]">
-                                <div className="p-4 sm:p-6">
-                                    {children}
-                                </div>
-                            </div>
+                        {/* Page Content - مسافة قليلة للتنسيق */}
+                        <div className="h-full p-4">
+                            {children}
                         </div>
                     </div>
                 </main>

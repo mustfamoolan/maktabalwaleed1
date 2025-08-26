@@ -24,40 +24,14 @@ class ProductController extends Controller
             ->get();
 
         $suppliers = Supplier::where('is_active', true)
-            ->with('category')
+            ->with(['category', 'categories']) // إضافة الفئات الإضافية
             ->orderBy('name_ar')
-            ->get();
-
-        $categories = SupplierCategory::where('is_active', true)
-            ->orderBy('name_ar')
-            ->get();
-
-        // فئات المنتجات هي نفس فئات الموردين
-        $productCategories = SupplierCategory::where('is_active', true)
-            ->orderBy('name_ar')
-            ->get();
-
-        return Inertia::render('Admin/Products/Index', [
-            'products' => $products,
-            'suppliers' => $suppliers,
-            'categories' => $categories,
-            'productCategories' => $productCategories
-        ]);
-    }
-
-    /**
-     * Display table view of products
-     */
-    public function table()
-    {
-        $products = Product::with(['supplier', 'supplier.category', 'category'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        $suppliers = Supplier::where('is_active', true)
-            ->with('category')
-            ->orderBy('name_ar')
-            ->get();
+            ->get()
+            ->map(function ($supplier) {
+                // إضافة جميع الفئات للمورد
+                $supplier->all_categories = $supplier->getAllCategoriesAttribute();
+                return $supplier;
+            });
 
         $categories = SupplierCategory::where('is_active', true)
             ->orderBy('name_ar')
@@ -73,6 +47,49 @@ class ProductController extends Controller
             'suppliers' => $suppliers,
             'categories' => $categories,
             'productCategories' => $productCategories
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $suppliers = Supplier::where('is_active', true)
+            ->with(['category', 'categories']) // إضافة الفئات الإضافية
+            ->orderBy('name_ar')
+            ->get()
+            ->map(function ($supplier) {
+                // إضافة جميع الفئات للمورد
+                $supplier->all_categories = $supplier->getAllCategoriesAttribute();
+                return $supplier;
+            });
+
+        $categories = SupplierCategory::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
+
+        // فئات المنتجات هي نفس فئات الموردين
+        $productCategories = SupplierCategory::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
+
+        return Inertia::render('Admin/Products/Create', [
+            'suppliers' => $suppliers,
+            'categories' => $categories,
+            'productCategories' => $productCategories
+        ]);
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Product $product)
+    {
+        $product->load(['supplier', 'category']);
+
+        return Inertia::render('Admin/Products/Show', [
+            'product' => $product
         ]);
     }
 
@@ -316,5 +333,44 @@ class ProductController extends Controller
             'barcode' => $barcode,
             'image_url' => route('admin.products.barcode.image', ['barcode' => $barcode])
         ]);
+    }
+
+    /**
+     * Search products for selection (API endpoint)
+     */
+    public function searchProducts(Request $request)
+    {
+        $query = $request->get('query');
+        $all = $request->get('all', false);
+
+        // If requesting all products for multi-product plans
+        if ($all) {
+            $products = Product::where('is_active', true)
+                ->with(['supplier'])
+                ->orderBy('name_ar')
+                ->get();
+
+            return response()->json($products);
+        }
+
+        if (empty($query) || strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $products = Product::where('is_active', true)
+            ->with(['supplier'])
+            ->where(function ($q) use ($query) {
+                $q->where('name_ar', 'LIKE', '%' . $query . '%')
+                  ->orWhere('name_en', 'LIKE', '%' . $query . '%')
+                  ->orWhere('barcode', 'LIKE', '%' . $query . '%')
+                  ->orWhereHas('supplier', function ($sq) use ($query) {
+                      $sq->where('name_ar', 'LIKE', '%' . $query . '%')
+                        ->orWhere('name_en', 'LIKE', '%' . $query . '%');
+                  });
+            })
+            ->limit(10)
+            ->get();
+
+        return response()->json($products);
     }
 }

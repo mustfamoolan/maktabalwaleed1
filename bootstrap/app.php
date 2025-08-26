@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'representative' => \App\Http\Middleware\RepresentativeAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -197,6 +197,16 @@ class Product extends Model
         });
     }
 
+    /**
+     * علاقة مع الخطط متعددة المنتجات
+     */
+    public function multiProductPlans()
+    {
+        return $this->belongsToMany(MultiProductPlan::class, 'multi_product_plan_products')
+                    ->withPivot('achieved_quantity')
+                    ->withTimestamps();
+    }
+
     // Events
     protected static function boot()
     {
