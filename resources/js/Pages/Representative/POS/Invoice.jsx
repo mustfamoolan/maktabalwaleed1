@@ -10,7 +10,7 @@ import {
     FaArrowLeft
 } from 'react-icons/fa';
 
-const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) => {
+const Invoice = ({ cart = [], customers, representatives }) => {
     // حالة العميل والدفع
     const [saleType, setSaleType] = useState('customer'); // فقط عميل
     const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -19,7 +19,6 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
 
     // حالة الحسابات
     const [paidAmount, setPaidAmount] = useState(0);
-    const [finalDiscountAmount, setFinalDiscountAmount] = useState(discountAmount);
     const [notes, setNotes] = useState('');
     const [dueDate, setDueDate] = useState('');
 
@@ -30,19 +29,32 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
     // حساب المجاميع
     const calculateTotals = () => {
         const subtotal = cart.reduce((sum, item) => {
-            const itemTotal = (item.quantity * item.unit_sale_price) - (item.quantity * item.unit_discount);
+            const itemTotal = item.quantity * item.unit_sale_price;
             return sum + itemTotal;
         }, 0);
 
-        const total = subtotal - finalDiscountAmount;
+        const total = subtotal;
         const remaining = total - paidAmount;
+
+        // حساب الوزن الكلي
+        const totalWeight = cart.reduce((sum, item) => {
+            const pieceWeight = parseFloat(item.product?.piece_weight_grams) || 0; // وزن القطعة بالغرام
+            const piecesPerCarton = parseFloat(item.product?.pieces_per_carton) || 1; // عدد القطع في الكارتون
+            const quantitySold = parseFloat(item.quantity) || 0; // عدد الكراتين المباعة
+
+            // الوزن = عدد الكراتين × عدد القطع في الكارتون × وزن القطعة الواحدة
+            const itemWeight = quantitySold * piecesPerCarton * pieceWeight;
+            return sum + itemWeight;
+        }, 0);
 
         return {
             subtotal: subtotal,
             total: total,
             remaining: remaining,
+            totalWeightGrams: totalWeight, // بالغرام
+            totalWeightKg: totalWeight / 1000, // بالكيلو
             profit: cart.reduce((sum, item) => {
-                const itemProfit = (item.unit_sale_price - item.unit_discount - item.product.cost_price) * item.quantity;
+                const itemProfit = (item.unit_sale_price - (item.product.purchase_price || 0)) * item.quantity;
                 return sum + itemProfit;
             }, 0)
         };
@@ -93,7 +105,7 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
                 customer_id: selectedCustomer?.id,
                 representative_id: null,
                 subtotal: totals.subtotal,
-                discount_amount: finalDiscountAmount,
+                discount_amount: 0,
                 total_amount: totals.total,
                 paid_amount: paidAmount,
                 remaining_amount: totals.remaining,
@@ -104,14 +116,18 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
                     product_id: item.product.id,
                     quantity: item.quantity,
                     unit_sale_price: item.unit_sale_price,
-                    unit_discount: item.unit_discount,
-                    total_price: (item.unit_sale_price - item.unit_discount) * item.quantity
+                    unit_discount: 0,
+                    total_price: item.unit_sale_price * item.quantity
                 }))
             };
 
             router.post('/representatives/pos', saleData, {
                 onSuccess: (data) => {
-                    alert('تم إنجاز البيع بنجاح! الفاتورة الآن في حالة الانتظار');
+                    const weightMessage = totals.totalWeightGrams > 0
+                        ? `\nالوزن الكلي: ${totals.totalWeightGrams.toLocaleString()} غرام${totals.totalWeightKg >= 1 ? ` (${totals.totalWeightKg.toFixed(2)} كغ)` : ''}`
+                        : '';
+
+                    alert(`تم إنجاز البيع بنجاح! الفاتورة الآن في حالة الانتظار${weightMessage}`);
                     // العودة إلى صفحة نقطة البيع مباشرة
                     router.visit('/representatives/pos');
                 },
@@ -174,56 +190,62 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
                                             <div className="font-medium text-gray-900 text-sm">{item.product.name}</div>
                                             <div className="text-xs text-gray-600">
                                                 {item.quantity} × {item.unit_sale_price} د.ع
-                                                {item.unit_discount > 0 && ` (خصم: ${item.unit_discount} د.ع)`}
                                             </div>
-                                            {item.product.supplier_name && (
-                                                <div className="text-xs text-blue-600">
-                                                    المورد: {item.product.supplier_name}
+                                            {/* معلومات الكارتون والوزن */}
+                                            <div className="text-xs text-green-600 mt-1">
+                                                {parseFloat(item.product?.pieces_per_carton) > 0 && (
+                                                    <span className="mr-2">
+                                                        🧩 {item.product.pieces_per_carton} قطعة/كارتون
+                                                    </span>
+                                                )}
+                                                {parseFloat(item.product?.piece_weight_grams) > 0 && (
+                                                    <span>
+                                                        ⚖️ {item.product.piece_weight_grams} غ/قطعة
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {/* وزن هذا المنتج */}
+                                            {parseFloat(item.product?.piece_weight_grams) > 0 && (
+                                                <div className="text-xs text-purple-600">
+                                                    الوزن الكلي: {(parseFloat(item.quantity) * (parseFloat(item.product.pieces_per_carton) || 1) * parseFloat(item.product.piece_weight_grams)).toLocaleString()} غرام
+                                                    {(parseFloat(item.quantity) * (parseFloat(item.product.pieces_per_carton) || 1) * parseFloat(item.product.piece_weight_grams)) >= 1000 && (
+                                                        <span className="ml-1">
+                                                            ({((parseFloat(item.quantity) * (parseFloat(item.product.pieces_per_carton) || 1) * parseFloat(item.product.piece_weight_grams)) / 1000).toFixed(2)} كغ)
+                                                        </span>
+                                                    )}
+                                                    <div className="text-xs text-gray-500 mt-1">
+                                                        ({item.quantity} كارتون × {item.product.pieces_per_carton || 1} قطعة × {item.product.piece_weight_grams} غ)
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="font-semibold text-gray-900 text-sm">
-                                            {((item.unit_sale_price - item.unit_discount) * item.quantity).toFixed(2)} د.ع
+                                            {(item.unit_sale_price * item.quantity).toFixed(2)} د.ع
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            {/* توزيع المنتجات حسب المورد */}
-                            {(() => {
-                                const supplierTotals = {};
-                                cart.forEach(item => {
-                                    const supplierName = item.product.supplier_name || 'مورد غير محدد';
-                                    const itemTotal = (item.unit_sale_price - item.unit_discount) * item.quantity;
-                                    supplierTotals[supplierName] = (supplierTotals[supplierName] || 0) + itemTotal;
-                                });
-
-                                return Object.keys(supplierTotals).length > 1 && (
-                                    <div className="mb-3">
-                                        <h4 className="font-semibold text-gray-900 text-sm mb-2">توزيع المبالغ حسب المورد:</h4>
-                                        <div className="space-y-1">
-                                            {Object.entries(supplierTotals).map(([supplier, total]) => (
-                                                <div key={supplier} className="flex justify-between text-xs p-1.5 bg-blue-50 rounded">
-                                                    <span className="text-blue-700">{supplier}</span>
-                                                    <span className="text-blue-900 font-medium">{total.toFixed(2)} د.ع</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                            {/* عرض الوزن الكلي للفاتورة */}
+                            <div className="mb-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <h4 className="font-semibold text-purple-900 text-sm mb-2 flex items-center gap-2">
+                                    ⚖️ الوزن الكلي للفاتورة
+                                </h4>
+                                <div className="text-center">
+                                    <div className="text-2xl font-bold text-purple-700">
+                                        {totals.totalWeightGrams > 0 ? totals.totalWeightGrams.toLocaleString() : '0'} غرام
                                     </div>
-                                );
-                            })()}
-
-                            {/* خصم إضافي */}
-                            <div className="mb-3">
-                                <label className="block text-xs font-medium text-gray-700 mb-1">خصم إضافي على الفاتورة</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    value={finalDiscountAmount}
-                                    onChange={(e) => setFinalDiscountAmount(parseFloat(e.target.value) || 0)}
-                                    className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    placeholder="0.00"
-                                />
+                                    {totals.totalWeightKg >= 1 && (
+                                        <div className="text-lg text-purple-600 mt-1">
+                                            ({totals.totalWeightKg.toFixed(2)} كيلو غرام)
+                                        </div>
+                                    )}
+                                    {totals.totalWeightGrams === 0 && (
+                                        <div className="text-sm text-gray-500 mt-1">
+                                            (لا توجد بيانات وزن للمنتجات)
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             {/* المجاميع */}
@@ -232,12 +254,6 @@ const Invoice = ({ cart = [], discountAmount = 0, customers, representatives }) 
                                     <span>المجموع الفرعي:</span>
                                     <span className="font-semibold">{totals.subtotal.toFixed(2)} د.ع</span>
                                 </div>
-                                {finalDiscountAmount > 0 && (
-                                    <div className="flex justify-between text-sm text-red-600">
-                                        <span>خصم إضافي:</span>
-                                        <span className="font-semibold">-{finalDiscountAmount.toFixed(2)} د.ع</span>
-                                    </div>
-                                )}
                                 <div className="flex justify-between text-sm text-green-600">
                                     <span>الربح المتوقع:</span>
                                     <span className="font-semibold">{totals.profit.toFixed(2)} د.ع</span>

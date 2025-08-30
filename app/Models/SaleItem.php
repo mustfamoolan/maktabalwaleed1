@@ -20,6 +20,10 @@ class SaleItem extends Model
         'final_total',
         'profit_amount',
         'notes',
+        'pieces_per_carton',
+        'piece_weight_grams',
+        'item_total_weight_grams',
+        'item_total_weight_kg',
     ];
 
     protected $casts = [
@@ -32,6 +36,10 @@ class SaleItem extends Model
         'total_discount' => 'decimal:2',
         'final_total' => 'decimal:2',
         'profit_amount' => 'decimal:2',
+        'pieces_per_carton' => 'integer',
+        'piece_weight_grams' => 'decimal:2',
+        'item_total_weight_grams' => 'decimal:2',
+        'item_total_weight_kg' => 'decimal:3',
     ];
 
     // العلاقات

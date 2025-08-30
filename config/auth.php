@@ -48,6 +48,10 @@ return [
             'driver' => 'session',
             'provider' => 'representatives',
         ],
+        'preparer' => [
+            'driver' => 'session',
+            'provider' => 'preparers',
+        ],
     ],
 
     /*
@@ -79,6 +83,10 @@ return [
         'representatives' => [
             'driver' => 'eloquent',
             'model' => App\Models\Representative::class,
+        ],
+        'preparers' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Preparer::class,
         ],
 
         // 'users' => [

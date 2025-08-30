@@ -32,6 +32,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
         wholesale_price: '',
         stock_quantity: '0',
         min_stock_level: '1',
+        pieces_per_carton: '',
+        piece_weight_grams: '',
         expiry_date: '',
         image: null,
         is_active: true
@@ -54,6 +56,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
         wholesale_price: '',
         stock_quantity: '0',
         min_stock_level: '1',
+        pieces_per_carton: '',
+        piece_weight_grams: '',
         expiry_date: '',
         image: null,
         is_active: true,
@@ -81,6 +85,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
             wholesale_price: '',
             stock_quantity: '0',
             min_stock_level: '1',
+            pieces_per_carton: '',
+            piece_weight_grams: '',
             expiry_date: '',
             image: null,
             is_active: true
@@ -108,6 +114,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
             wholesale_price: product.wholesale_price || '',
             stock_quantity: product.stock_quantity || '0',
             min_stock_level: product.min_stock_level || '1',
+            pieces_per_carton: product.pieces_per_carton || '',
+            piece_weight_grams: product.piece_weight_grams || '',
             expiry_date: product.expiry_date || '',
             image: null, // الصورة الجديدة إن وُجدت
             is_active: product.is_active
@@ -182,6 +190,8 @@ export default function IndexTable({ products, suppliers, categories, productCat
             wholesale_price: '',
             stock_quantity: '0',
             min_stock_level: '1',
+            pieces_per_carton: '',
+            piece_weight_grams: '',
             expiry_date: '',
             image: null,
             is_active: true
@@ -869,6 +879,28 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                         </div>
 
                                         <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">قطع في الكارتون</label>
+                                            <input
+                                                type="number"
+                                                value={modalData.pieces_per_carton}
+                                                onChange={(e) => setModalData(prev => ({...prev, pieces_per_carton: e.target.value}))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                placeholder="عدد القطع في الكارتون"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">وزن القطعة (غرام)</label>
+                                            <input
+                                                type="number"
+                                                value={modalData.piece_weight_grams}
+                                                onChange={(e) => setModalData(prev => ({...prev, piece_weight_grams: e.target.value}))}
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                                placeholder="وزن القطعة بالغرام"
+                                            />
+                                        </div>
+
+                                        <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">تاريخ الصلاحية</label>
                                             <input
                                                 type="date"
@@ -1071,6 +1103,12 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                     <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase border-r border-gray-200 w-16">
                                         الحد الأدنى
                                     </th>
+                                    <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase border-r border-gray-200 w-20">
+                                        قطع/كارتون
+                                    </th>
+                                    <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase border-r border-gray-200 w-20">
+                                        الوزن (غرام)
+                                    </th>
                                     <th className="px-2 py-2 text-right text-xs font-medium text-gray-500 uppercase border-r border-gray-200 w-12">
                                         الحالة
                                     </th>
@@ -1187,6 +1225,24 @@ export default function IndexTable({ products, suppliers, categories, productCat
                                                     rowId={rowId}
                                                     field="min_stock_level"
                                                     value={row.min_stock_level}
+                                                    type="number"
+                                                />
+                                            </td>
+
+                                            <td className="px-2 py-1 border-r border-gray-200">
+                                                <EditableCell
+                                                    rowId={rowId}
+                                                    field="pieces_per_carton"
+                                                    value={row.pieces_per_carton}
+                                                    type="number"
+                                                />
+                                            </td>
+
+                                            <td className="px-2 py-1 border-r border-gray-200">
+                                                <EditableCell
+                                                    rowId={rowId}
+                                                    field="piece_weight_grams"
+                                                    value={row.piece_weight_grams}
                                                     type="number"
                                                 />
                                             </td>

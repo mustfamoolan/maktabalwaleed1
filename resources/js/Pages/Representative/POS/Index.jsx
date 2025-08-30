@@ -19,7 +19,7 @@ import {
     FaCheckCircle
 } from 'react-icons/fa';
 
-const Index = ({ products, customers, representatives }) => {
+const Index = ({ products, customers, representatives, flash }) => {
     // حالة السلة والمنتجات
     const [cart, setCart] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +39,6 @@ const Index = ({ products, customers, representatives }) => {
 
     // حالة الحسابات
     const [paidAmount, setPaidAmount] = useState(0);
-    const [discountAmount, setDiscountAmount] = useState(0);
     const [notes, setNotes] = useState('');
     const [dueDate, setDueDate] = useState('');
 
@@ -77,6 +76,13 @@ const Index = ({ products, customers, representatives }) => {
 
         setFilteredProducts(filtered);
     }, [searchTerm, selectedCategory, products]);
+
+    // عرض رسالة النجاح عند اكتمال البيع
+    useEffect(() => {
+        if (flash?.success) {
+            alert(flash.success);
+        }
+    }, [flash]);
 
     // تفريغ السلة عند تحميل الصفحة (بداية جلسة جديدة)
     useEffect(() => {
@@ -149,7 +155,7 @@ const Index = ({ products, customers, representatives }) => {
                 id: product.id,
                 product: product,
                 quantity: 1,
-                unit_sale_price: product.selling_price,
+                unit_sale_price: parseFloat(product.selling_price || 0),
                 unit_discount: 0
             };
             setCart([...cart, newItem]);
@@ -176,24 +182,6 @@ const Index = ({ products, customers, representatives }) => {
         }));
     };
 
-    // تحديث سعر البيع
-    const updateSalePrice = (itemId, newPrice) => {
-        if (newPrice < 0) return;
-
-        setCart(cart.map(item =>
-            item.id === itemId ? { ...item, unit_sale_price: newPrice } : item
-        ));
-    };
-
-    // تحديث الخصم
-    const updateDiscount = (itemId, newDiscount) => {
-        if (newDiscount < 0) return;
-
-        setCart(cart.map(item =>
-            item.id === itemId ? { ...item, unit_discount: newDiscount } : item
-        ));
-    };
-
     // حذف من السلة
     const removeFromCart = (itemId) => {
         setCart(cart.filter(item => item.id !== itemId));
@@ -207,7 +195,6 @@ const Index = ({ products, customers, representatives }) => {
         setCustomerName('');
         setCustomerPhone('');
         setPaidAmount(0);
-        setDiscountAmount(0);
         setNotes('');
         setDueDate('');
         setErrors({});
@@ -216,19 +203,32 @@ const Index = ({ products, customers, representatives }) => {
     // حساب المجاميع
     const calculateTotals = () => {
         const subtotal = cart.reduce((sum, item) => {
-            const itemTotal = (item.quantity * item.unit_sale_price) - (item.quantity * item.unit_discount);
+            const itemTotal = parseFloat(item.quantity || 0) * parseFloat(item.unit_sale_price || 0);
             return sum + itemTotal;
         }, 0);
 
-        const total = subtotal - discountAmount;
-        const remaining = total - paidAmount;
+        const total = subtotal;
+        const remaining = total - parseFloat(paidAmount || 0);
+
+        // حساب الوزن الكلي
+        const totalWeight = cart.reduce((sum, item) => {
+            const pieceWeight = parseFloat(item.product?.piece_weight_grams) || 0;
+            const piecesPerCarton = parseFloat(item.product?.pieces_per_carton) || 1;
+            const quantitySold = parseFloat(item.quantity) || 0;
+
+            // الوزن = عدد الكراتين × عدد القطع في الكارتون × وزن القطعة الواحدة
+            const itemWeight = quantitySold * piecesPerCarton * pieceWeight;
+            return sum + itemWeight;
+        }, 0);
 
         return {
             subtotal: subtotal,
             total: total,
             remaining: remaining,
+            totalWeightGrams: totalWeight,
+            totalWeightKg: totalWeight / 1000,
             profit: cart.reduce((sum, item) => {
-                const itemProfit = (item.unit_sale_price - item.unit_discount - item.product.cost_price) * item.quantity;
+                const itemProfit = (parseFloat(item.unit_sale_price || 0) - parseFloat(item.product?.purchase_price || 0)) * parseFloat(item.quantity || 0);
                 return sum + itemProfit;
             }, 0)
         };
@@ -279,58 +279,43 @@ const Index = ({ products, customers, representatives }) => {
 
         setLoading(true);
 
-        try {
-            const saleData = {
-                sale_type: saleType,
-                customer_name: saleType === 'cash' ? customerName : null,
-                customer_phone: saleType === 'cash' ? customerPhone : null,
-                customer_id: saleType === 'customer' ? selectedCustomer?.id : null,
-                representative_id: saleType === 'representative' ? selectedRepresentative?.id : null,
-                subtotal: totals.subtotal,
-                discount_amount: discountAmount,
-                total_amount: totals.total,
-                paid_amount: paidAmount,
-                remaining_amount: totals.remaining,
-                payment_status: getPaymentStatus(),
-                due_date: totals.remaining > 0 ? dueDate : null,
-                notes: notes,
-                items: cart.map(item => ({
-                    product_id: item.product.id,
-                    quantity: item.quantity,
-                    unit_sale_price: item.unit_sale_price,
-                    unit_discount: item.unit_discount,
-                    total_price: (item.unit_sale_price - item.unit_discount) * item.quantity
-                }))
-            };
+        const saleData = {
+            sale_type: saleType,
+            customer_name: saleType === 'cash' ? customerName : null,
+            customer_phone: saleType === 'cash' ? customerPhone : null,
+            customer_id: saleType === 'customer' ? selectedCustomer?.id : null,
+            representative_id: saleType === 'representative' ? selectedRepresentative?.id : null,
+            subtotal: totals.subtotal,
+            discount_amount: 0, // إزالة الخصم
+            total_amount: totals.total,
+            paid_amount: paidAmount,
+            remaining_amount: totals.remaining,
+            payment_status: getPaymentStatus(),
+            due_date: totals.remaining > 0 ? dueDate : null,
+            notes: notes,
+            items: cart.map(item => ({
+                product_id: item.product.id,
+                quantity: item.quantity,
+                unit_sale_price: item.unit_sale_price,
+                unit_discount: 0, // إزالة الخصم
+                total_price: item.unit_sale_price * item.quantity
+            }))
+        };
 
-            const response = await fetch('/representatives/pos', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify(saleData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                alert('تم إنجاز البيع بنجاح');
+        router.post('/representatives/pos', saleData, {
+            onSuccess: (page) => {
+                // تم إنجاز البيع بنجاح
                 clearCart();
                 setShowCart(false);
-
-                // إعادة تحميل البيانات
-                router.visit('/representatives/pos');
-            } else {
-                console.error('خطأ في البيع:', result);
-                setErrors(result.errors || { general: 'فشل في إنجاز البيع' });
+            },
+            onError: (errors) => {
+                console.error('خطأ في البيع:', errors);
+                setErrors(errors);
+            },
+            onFinish: () => {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('خطأ في الشبكة:', error);
-            alert('خطأ في الاتصال بالخادم');
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
     return (
@@ -434,6 +419,17 @@ const Index = ({ products, customers, representatives }) => {
                                             <div className="text-xs text-gray-600">
                                                 {product.supplier_name || 'غير محدد'}
                                             </div>
+                                            {/* معلومات الكارتون والوزن */}
+                                            {(product.pieces_per_carton || product.piece_weight_grams) && (
+                                                <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">
+                                                    {product.pieces_per_carton && (
+                                                        <span className="mr-2">🧩 {product.pieces_per_carton}/كارتون</span>
+                                                    )}
+                                                    {product.piece_weight_grams && (
+                                                        <span>⚖️ {product.piece_weight_grams}غ</span>
+                                                    )}
+                                                </div>
+                                            )}
                                             <div className="flex justify-between items-center">
                                                 <div className="text-sm">
                                                     <span className="text-green-600 font-semibold">{product.selling_price} د.ع</span>
@@ -548,29 +544,32 @@ const Index = ({ products, customers, representatives }) => {
                                                 <div className="space-y-2">
                                                     <div>
                                                         <label className="block text-xs text-gray-600">سعر البيع</label>
-                                                        <input
-                                                            type="number"
-                                                            step="0.01"
-                                                            value={item.unit_sale_price}
-                                                            onChange={(e) => updateSalePrice(item.id, parseFloat(e.target.value) || 0)}
-                                                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-green-500"
-                                                        />
+                                                        <div className="w-full px-2 py-1 text-xs border border-gray-300 rounded bg-gray-100 text-gray-700">
+                                                            {parseFloat(item.unit_sale_price || 0).toFixed(2)} د.ع
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <label className="block text-xs text-gray-600">خصم الوحدة</label>
-                                                        <input
-                                                            type="number"
-                                                            step="0.01"
-                                                            value={item.unit_discount}
-                                                            onChange={(e) => updateDiscount(item.id, parseFloat(e.target.value) || 0)}
-                                                            className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:ring-1 focus:ring-green-500"
-                                                        />
+                                                    {/* معلومات الوزن والكارتون */}
+                                                    <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                                                        {item.product.pieces_per_carton && (
+                                                            <div>🧩 {item.product.pieces_per_carton} قطعة/كارتون</div>
+                                                        )}
+                                                        {item.product.piece_weight_grams && (
+                                                            <div>⚖️ {item.product.piece_weight_grams} غ/قطعة</div>
+                                                        )}
+                                                        {item.product.piece_weight_grams && (
+                                                            <div className="text-purple-600 font-medium">
+                                                                الوزن الكلي: {(item.quantity * (item.product.pieces_per_carton || 1) * item.product.piece_weight_grams).toLocaleString()} غرام
+                                                                <div className="text-xs text-gray-500">
+                                                                    ({item.quantity} كارتون × {item.product.pieces_per_carton || 1} قطعة × {item.product.piece_weight_grams} غ)
+                                                                </div>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </div>
 
                                                 <div className="mt-2 pt-2 border-t border-gray-100">
                                                     <div className="text-sm font-semibold text-gray-900">
-                                                        المجموع: {((item.unit_sale_price - item.unit_discount) * item.quantity).toFixed(2)} د.ع
+                                                        المجموع: {(parseFloat(item.unit_sale_price || 0) * parseFloat(item.quantity || 0)).toFixed(2)} د.ع
                                                     </div>
                                                 </div>
                                             </div>
@@ -581,25 +580,24 @@ const Index = ({ products, customers, representatives }) => {
                                 {/* المجموع النهائي وأزرار الإجراءات */}
                                 {cart.length > 0 && (
                                     <div className="p-4 border-t border-gray-200 bg-gray-50">
-                                        {/* خصم إضافي */}
-                                        <div className="mb-3">
-                                            <label className="block text-sm font-medium text-gray-700 mb-1">خصم إضافي</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                value={discountAmount}
-                                                onChange={(e) => setDiscountAmount(parseFloat(e.target.value) || 0)}
-                                                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-
                                         {/* المجاميع */}
                                         <div className="space-y-2 mb-4">
                                             <div className="flex justify-between text-sm">
                                                 <span>المجموع الفرعي:</span>
                                                 <span className="font-semibold">{totals.subtotal.toFixed(2)} د.ع</span>
                                             </div>
+                                            {/* الوزن الكلي */}
+                                            {totals.totalWeightGrams > 0 && (
+                                                <div className="flex justify-between text-sm text-purple-600">
+                                                    <span>الوزن الكلي:</span>
+                                                    <span className="font-semibold">
+                                                        {totals.totalWeightGrams.toLocaleString()} غرام
+                                                        {totals.totalWeightKg >= 1 && (
+                                                            <span className="ml-1">({totals.totalWeightKg.toFixed(2)} كغ)</span>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
                                             <div className="flex justify-between text-lg font-bold border-t pt-2">
                                                 <span>الإجمالي:</span>
                                                 <span className="text-green-600">{totals.total.toFixed(2)} د.ع</span>
@@ -613,7 +611,7 @@ const Index = ({ products, customers, representatives }) => {
                                                     setShowCart(false);
                                                     router.visit('/representatives/pos/invoice', {
                                                         method: 'post',
-                                                        data: { cart: cart, discountAmount: discountAmount }
+                                                        data: { cart: cart }
                                                     });
                                                 }}
                                                 disabled={cart.length === 0}

@@ -28,6 +28,9 @@ class Sale extends Model
         'total_profit',
         'driver_id',
         'status_notes',
+        'prepared_by',
+        'preparation_notes',
+        'preparation_completed_at',
         'notes',
         'customer_name',
         'customer_phone',
@@ -37,6 +40,8 @@ class Sale extends Model
         'prepared_at',
         'delivered_at',
         'approved_at',
+        'total_weight_grams',
+        'total_weight_kg',
     ];
 
     protected $casts = [
@@ -46,12 +51,15 @@ class Sale extends Model
         'remaining_amount' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'total_profit' => 'decimal:2',
+        'total_weight_grams' => 'decimal:2',
+        'total_weight_kg' => 'decimal:3',
         'sale_date' => 'datetime',
         'due_date' => 'date',
         'sent_at' => 'datetime',
         'prepared_at' => 'datetime',
         'delivered_at' => 'datetime',
         'approved_at' => 'datetime',
+        'preparation_completed_at' => 'datetime',
     ];
 
     // العلاقات
@@ -93,6 +101,11 @@ class Sale extends Model
     public function driver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'driver_id');
+    }
+
+    public function preparer(): BelongsTo
+    {
+        return $this->belongsTo(Preparer::class, 'prepared_by');
     }
 
     // الطرق المساعدة

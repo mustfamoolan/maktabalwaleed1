@@ -33,6 +33,8 @@ class Product extends Model
         'max_stock_level',
         'weight',
         'dimensions',
+        'pieces_per_carton',
+        'piece_weight_grams',
         'is_active',
         'track_stock',
         'image',
@@ -57,6 +59,8 @@ class Product extends Model
         'stock_quantity' => 'integer',
         'min_stock_level' => 'integer',
         'max_stock_level' => 'integer',
+        'pieces_per_carton' => 'integer',
+        'piece_weight_grams' => 'integer',
         'expiry_date' => 'date',
         'barcode_generated_at' => 'datetime'
     ];

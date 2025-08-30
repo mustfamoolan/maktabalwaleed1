@@ -22,10 +22,10 @@ export default function Landing() {
         {
             title: 'لوحة المجهزين',
             description: 'إدارة المواد والتوريدات',
-            href: '/suppliers/login',
+            href: '/preparer/login',
             icon: '🏭',
-            color: 'from-orange-500 to-orange-600',
-            bgColor: 'bg-orange-50'
+            color: 'from-purple-500 to-purple-600',
+            bgColor: 'bg-purple-50'
         },
         {
             title: 'لوحة السائقين',

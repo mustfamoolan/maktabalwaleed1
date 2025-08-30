@@ -116,6 +116,8 @@ class ProductController extends Controller
             'wholesale_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'min_stock_level' => 'required|integer|min:0',
+            'pieces_per_carton' => 'nullable|integer|min:1',
+            'piece_weight_grams' => 'nullable|integer|min:1',
             'expiry_date' => 'nullable|date|after:today',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp|max:5120',
             'is_active' => 'nullable|in:0,1,true,false'
@@ -192,6 +194,8 @@ class ProductController extends Controller
             'wholesale_price' => 'nullable|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'min_stock_level' => 'required|integer|min:0',
+            'pieces_per_carton' => 'nullable|integer|min:1',
+            'piece_weight_grams' => 'nullable|integer|min:1',
             'expiry_date' => 'nullable|date|after:today',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp|max:5120',
             'is_active' => 'nullable|in:0,1,true,false'

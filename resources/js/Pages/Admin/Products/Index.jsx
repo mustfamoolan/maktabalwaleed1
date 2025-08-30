@@ -30,6 +30,8 @@ export default function Index({ products, suppliers, categories, productCategori
         wholesale_price: '',
         stock_quantity: '',
         min_stock_level: '',
+        pieces_per_carton: '',
+        piece_weight_grams: '',
         expiry_date: '',
         image: null,
         is_active: true
@@ -129,6 +131,8 @@ export default function Index({ products, suppliers, categories, productCategori
             wholesale_price: product.wholesale_price || '',
             stock_quantity: product.stock_quantity || product.current_stock || 0,
             min_stock_level: product.min_stock_level || 0,
+            pieces_per_carton: product.pieces_per_carton || '',
+            piece_weight_grams: product.piece_weight_grams || '',
             expiry_date: product.expiry_date || '',
             image: null,
             is_active: product.is_active
@@ -667,6 +671,34 @@ export default function Index({ products, suppliers, categories, productCategori
                                             onChange={(e) => setData('min_stock_level', e.target.value)}
                                             className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                                             required
+                                        />
+                                    </div>
+
+                                    {/* Pieces per Carton */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            عدد القطع في الكارتون
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={data.pieces_per_carton}
+                                            onChange={(e) => setData('pieces_per_carton', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="عدد القطع في الكارتون"
+                                        />
+                                    </div>
+
+                                    {/* Piece Weight */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            وزن القطعة (غرام)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={data.piece_weight_grams}
+                                            onChange={(e) => setData('piece_weight_grams', e.target.value)}
+                                            className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                                            placeholder="وزن القطعة بالغرام"
                                         />
                                     </div>
 

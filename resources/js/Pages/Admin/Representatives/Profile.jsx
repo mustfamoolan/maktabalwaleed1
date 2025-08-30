@@ -674,7 +674,7 @@ export default function Profile({ representative, products, currentTargets: init
     // Category Plans Functions
     const loadSupplierCategories = async () => {
         try {
-            const response = await axios.get('/admin/supplier-categories');
+            const response = await axios.get('/admin/api/supplier-categories');
             setSupplierCategories(response.data.categories || response.data);
         } catch (error) {
             console.error('Error loading supplier categories:', error);

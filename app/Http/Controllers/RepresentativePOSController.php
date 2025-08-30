@@ -24,7 +24,7 @@ class RepresentativePOSController extends Controller
 
         // جلب المنتجات المتاحة (مؤقتاً بدون شرط الكمية للاختبار)
         $products = Product::where('is_active', true)
-            ->with('supplier')
+            ->with(['supplier', 'category'])
             ->get()
             ->map(function ($product) {
                 $stock = $product->stock_quantity ?? $product->current_stock ?? 0;
@@ -38,6 +38,9 @@ class RepresentativePOSController extends Controller
                     'unit' => $product->unit ?? 'قطعة',
                     'supplier_name' => $product->supplier->name ?? '',
                     'image' => $product->image,
+                    'category' => $product->category->name_ar ?? null,
+                    'pieces_per_carton' => $product->pieces_per_carton,
+                    'piece_weight_grams' => $product->piece_weight_grams,
                 ];
             });
 
@@ -126,12 +129,19 @@ class RepresentativePOSController extends Controller
             $supplierTotals = [];
             $categoryTotals = [];
             $totalProfit = 0;
+            $totalWeightGrams = 0; // الوزن الكلي بالغرام
 
             foreach ($request->items as $item) {
                 $product = Product::with(['supplier', 'category'])->findOrFail($item['product_id']);
                 $itemTotal = $item['quantity'] * $item['unit_sale_price'];
                 $itemProfit = ($item['unit_sale_price'] - $product->purchase_price) * $item['quantity'];
                 $totalProfit += $itemProfit;
+
+                // حساب وزن هذا المنتج
+                $piecesPerCarton = $product->pieces_per_carton ?? 1;
+                $pieceWeightGrams = $product->piece_weight_grams ?? 0;
+                $itemWeightGrams = $item['quantity'] * $piecesPerCarton * $pieceWeightGrams;
+                $totalWeightGrams += $itemWeightGrams;
 
                 // تجميع المجاميع حسب المورد
                 if ($product->supplier_id) {
@@ -168,6 +178,8 @@ class RepresentativePOSController extends Controller
                 'primary_supplier_id' => $primarySupplierId,
                 'primary_category_id' => $primaryCategoryId,
                 'total_profit' => $totalProfit,
+                'total_weight_grams' => $totalWeightGrams,
+                'total_weight_kg' => $totalWeightGrams / 1000,
                 'notes' => $request->notes,
                 'sale_date' => now(),
                 'due_date' => $request->due_date,
@@ -186,6 +198,12 @@ class RepresentativePOSController extends Controller
                 // حساب ربح الصنف
                 $itemProfit = ($item['unit_sale_price'] - $product->purchase_price) * $item['quantity'];
 
+                // حساب وزن هذا المنتج
+                $piecesPerCarton = $product->pieces_per_carton ?? 1;
+                $pieceWeightGrams = $product->piece_weight_grams ?? 0;
+                $itemWeightGrams = $item['quantity'] * $piecesPerCarton * $pieceWeightGrams;
+                $itemWeightKg = $itemWeightGrams / 1000;
+
                 // إنشاء صنف البيع
                 SaleItem::create([
                     'sale_id' => $sale->id,
@@ -195,6 +213,10 @@ class RepresentativePOSController extends Controller
                     'unit_sale_price' => $item['unit_sale_price'],
                     'unit_discount' => $item['unit_discount'] ?? 0,
                     'profit_amount' => $itemProfit,
+                    'pieces_per_carton' => $piecesPerCarton,
+                    'piece_weight_grams' => $pieceWeightGrams,
+                    'item_total_weight_grams' => $itemWeightGrams,
+                    'item_total_weight_kg' => $itemWeightKg,
                     'notes' => $item['notes'] ?? null,
                 ]);
 
@@ -226,18 +248,16 @@ class RepresentativePOSController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'message' => 'تم إنجاز البيع بنجاح',
-                'sale_id' => $sale->id
-            ]);
+            // إعادة التوجه إلى صفحة POS مع رسالة نجاح
+            return redirect()->route('representatives.pos.index')
+                ->with('success', 'تم إنجاز البيع بنجاح')
+                ->with('sale_id', $sale->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 422);
+            return redirect()->back()
+                ->withErrors(['general' => $e->getMessage()])
+                ->withInput();
         }
     }
 
@@ -344,7 +364,7 @@ class RepresentativePOSController extends Controller
                 $q->where('name_ar', 'like', "%{$query}%")
                   ->orWhere('barcode', 'like', "%{$query}%");
             })
-            ->with('supplier')
+            ->with(['supplier', 'category'])
             ->limit(10)
             ->get()
             ->map(function ($product) {
@@ -358,6 +378,9 @@ class RepresentativePOSController extends Controller
                     'quantity' => $stock,
                     'unit' => $product->unit ?? 'قطعة',
                     'supplier_name' => $product->supplier->name ?? '',
+                    'category' => $product->category->name_ar ?? null,
+                    'pieces_per_carton' => $product->pieces_per_carton,
+                    'piece_weight_grams' => $product->piece_weight_grams,
                 ];
             });
 
@@ -430,7 +453,7 @@ class RepresentativePOSController extends Controller
                 $query->where('current_stock', '>', 0)
                       ->orWhere('stock_quantity', '>', 0);
             })
-            ->with('supplier')
+            ->with(['supplier', 'category'])
             ->first();
 
         if (!$product) {
@@ -448,6 +471,55 @@ class RepresentativePOSController extends Controller
             'quantity' => $stock,
             'unit' => $product->unit ?? 'قطعة',
             'supplier_name' => $product->supplier->name ?? '',
+            'category' => $product->category->name_ar ?? null,
+            'pieces_per_carton' => $product->pieces_per_carton,
+            'piece_weight_grams' => $product->piece_weight_grams,
+        ]);
+    }
+
+    /**
+     * عرض تفاصيل فاتورة محفوظة مع الوزن
+     */
+    public function showSaleDetails($saleId)
+    {
+        $representative = Auth::guard('representative')->user();
+
+        $sale = Sale::with(['items.product', 'customer', 'buyer'])
+            ->where('seller_representative_id', $representative->id)
+            ->findOrFail($saleId);
+
+        return Inertia::render('Representative/POS/SaleDetails', [
+            'sale' => $sale
+        ]);
+    }
+
+    /**
+     * جلب تفاصيل الفاتورة كـ API
+     */
+    public function getSaleDetails($saleId)
+    {
+        $representative = Auth::guard('representative')->user();
+
+        $sale = Sale::with(['items.product.supplier', 'customer', 'buyer'])
+            ->where('seller_representative_id', $representative->id)
+            ->findOrFail($saleId);
+
+        return response()->json([
+            'sale' => $sale,
+            'weight_summary' => [
+                'total_weight_grams' => $sale->total_weight_grams,
+                'total_weight_kg' => $sale->total_weight_kg,
+                'items_breakdown' => $sale->items->map(function($item) {
+                    return [
+                        'product_name' => $item->product->name_ar,
+                        'quantity' => $item->quantity,
+                        'pieces_per_carton' => $item->pieces_per_carton,
+                        'piece_weight_grams' => $item->piece_weight_grams,
+                        'item_total_weight_grams' => $item->item_total_weight_grams,
+                        'item_total_weight_kg' => $item->item_total_weight_kg,
+                    ];
+                })
+            ]
         ]);
     }
 }

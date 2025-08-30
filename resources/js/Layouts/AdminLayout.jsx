@@ -68,6 +68,12 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
             description: 'إدارة فريق المبيعات والرواتب والخطط'
         },
         {
+            name: 'المجهزين',
+            href: '/admin/preparers',
+            icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z',
+            description: 'إدارة المجهزين والرواتب'
+        },
+        {
             name: 'العملاء',
             href: '/admin/customers',
             icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
@@ -120,7 +126,7 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
     };
 
     const formatTime = (date) => {
-        return date.toLocaleTimeString('ar-SA', {
+        return date.toLocaleTimeString('en-US', {
             hour12: false,
             hour: '2-digit',
             minute: '2-digit'
@@ -128,7 +134,7 @@ export default function AdminLayout({ children, title = 'لوحة المقر ا�
     };
 
     const formatDate = (date) => {
-        return date.toLocaleDateString('ar-SA', {
+        return date.toLocaleDateString('en-US', {
             weekday: 'long',
             year: 'numeric',
             month: 'long',

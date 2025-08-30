@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\RepresentativeController;
 use App\Http\Controllers\Admin\SalaryPlanController;
 use App\Http\Controllers\Admin\RepresentativeSalaryController;
+use App\Http\Controllers\Admin\PreparerController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\InvoiceController as AdminInvoiceController;
 use App\Http\Controllers\RepresentativeAuthController;
@@ -118,12 +119,23 @@ Route::prefix('admin')->middleware('admin')->group(function () {
     Route::put('multi-product-plans/{plan}/products/{product}/quantity', [RepresentativeController::class, 'updateMultiPlanProductQuantity'])
         ->name('admin.multi-product-plans.update-quantity');
 
+    // مسارات إدارة المجهزين
+    Route::resource('preparers', PreparerController::class)->names([
+        'index' => 'admin.preparers.index',
+        'create' => 'admin.preparers.create',
+        'store' => 'admin.preparers.store',
+        'show' => 'admin.preparers.show',
+        'edit' => 'admin.preparers.edit',
+        'update' => 'admin.preparers.update',
+        'destroy' => 'admin.preparers.destroy'
+    ]);
+
     // مسارات الخطط حسب الأقسام
     Route::post('representatives/{representative}/category-plans', [RepresentativeController::class, 'storeCategoryPlan'])
         ->name('admin.representatives.store-category-plan');
     Route::get('representatives/{representative}/category-plans', [RepresentativeController::class, 'getCategoryPlans'])
         ->name('admin.representatives.get-category-plans');
-    Route::get('supplier-categories', [RepresentativeController::class, 'getSupplierCategories'])
+    Route::get('api/supplier-categories', [RepresentativeController::class, 'getSupplierCategories'])
         ->name('admin.representatives.get-supplier-categories');
 
     // مسارات الخطط حسب الموردين
@@ -215,9 +227,39 @@ Route::prefix('representatives')->middleware('representative')->group(function (
         Route::post('/invoice', [RepresentativePOSController::class, 'invoice'])->name('representatives.pos.invoice.post');
         Route::post('/', [RepresentativePOSController::class, 'store'])->name('representatives.pos.store');
         Route::get('/receipt/{sale}', [RepresentativePOSController::class, 'receipt'])->name('representatives.pos.receipt');
+        Route::get('/sale/{sale}/details', [RepresentativePOSController::class, 'showSaleDetails'])->name('representatives.pos.sale-details');
+        Route::get('/sale/{sale}/api', [RepresentativePOSController::class, 'getSaleDetails'])->name('representatives.pos.sale-details-api');
         Route::post('/sales/{sale}/status', [RepresentativePOSController::class, 'updateStatus'])->name('representatives.pos.update-status');
         Route::post('/sales/{sale}/send', [RepresentativePOSController::class, 'sendInvoice'])->name('representatives.pos.send-invoice');
         Route::get('/search-product', [RepresentativePOSController::class, 'searchProduct'])->name('representatives.pos.search-product');
         Route::get('/product/{barcode}', [RepresentativePOSController::class, 'getProductByBarcode'])->name('representatives.pos.product-by-barcode');
+    });
+});
+
+// مسارات تسجيل الدخول للمجهزين
+use App\Http\Controllers\PreparerAuthController;
+use App\Http\Controllers\Preparer\DashboardController as PreparerDashboardController;
+
+Route::prefix('preparer')->name('preparer.')->group(function () {
+    // مسارات تسجيل الدخول (للضيوف)
+    Route::middleware('guest:preparer')->group(function () {
+        Route::get('/login', [PreparerAuthController::class, 'showLoginForm'])->name('login');
+        Route::post('/login', [PreparerAuthController::class, 'login'])->name('login.post');
+    });
+
+    // مسارات المجهزين المحمية
+    Route::middleware('auth:preparer')->group(function () {
+        Route::get('/dashboard', [PreparerDashboardController::class, 'index'])->name('dashboard');
+
+        // مسارات الفواتير
+        Route::prefix('invoices')->name('invoices.')->group(function () {
+            Route::get('/preparing', [PreparerDashboardController::class, 'preparingInvoices'])->name('preparing');
+            Route::get('/completed', [PreparerDashboardController::class, 'completedInvoices'])->name('completed');
+            Route::get('/completed/{invoice}', [PreparerDashboardController::class, 'showCompletedInvoice'])->name('show-completed');
+            Route::get('/{invoice}', [PreparerDashboardController::class, 'showInvoice'])->name('show');
+            Route::patch('/{invoice}/complete', [PreparerDashboardController::class, 'completeInvoice'])->name('complete');
+        });
+
+        Route::post('/logout', [PreparerAuthController::class, 'logout'])->name('logout');
     });
 });
