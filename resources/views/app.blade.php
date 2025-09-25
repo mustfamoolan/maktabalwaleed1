@@ -18,12 +18,12 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <!-- PWA Icons -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/png" sizes="32x32" href="/images/icon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/icon-16x16.png">
-    <link rel="apple-touch-icon" href="/images/icon-192x192.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/images/icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/icon-180x180.png">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/icon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('images/icon-16x16.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/icon-192x192.png') }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('images/icon-152x152.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('images/icon-180x180.png') }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -33,10 +33,10 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <!-- PWA Styles -->
-    <link rel="stylesheet" href="/css/pwa.css">
+    <link rel="stylesheet" href="{{ asset('css/pwa.css') }}">
 
     <!-- إصلاح النصوص البيضاء -->
-    <link rel="stylesheet" href="/css/text-fix.css">
+    <link rel="stylesheet" href="{{ asset('css/text-fix.css') }}">
 
     <!-- إصلاح فوري للنصوص البيضاء -->
     <style>
@@ -71,7 +71,7 @@
     </style>
 
     <!-- PWA Scripts -->
-    <script src="/js/pwa.js" defer></script>
+    <script src="{{ asset('js/pwa-simple.js') }}" defer></script>
 </head>
 <body class="antialiased">
     <div id="app">
