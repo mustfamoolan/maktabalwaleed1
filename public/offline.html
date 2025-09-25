@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>غير متصل - نظام إدارة المبيعات</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            direction: rtl;
+        }
+
+        .offline-container {
+            text-align: center;
+            max-width: 500px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .offline-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .retry-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            margin: 10px;
+        }
+
+        .retry-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .home-btn {
+            background: #2196F3;
+        }
+
+        .home-btn:hover {
+            background: #1976D2;
+        }
+
+        .features {
+            margin-top: 40px;
+            text-align: right;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .feature-icon {
+            font-size: 24px;
+            margin-left: 15px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .connection-status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .online {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid #4CAF50;
+        }
+
+        .offline {
+            background: rgba(244, 67, 54, 0.3);
+            border: 2px solid #f44336;
+        }
+
+        @media (max-width: 600px) {
+            .offline-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            p {
+                font-size: 1rem;
+            }
+
+            .features {
+                text-align: center;
+            }
+
+            .feature {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon">
+            📡
+        </div>
+
+        <h1>غير متصل بالإنترنت</h1>
+        <p>يبدو أن اتصالك بالإنترنت غير متاح حالياً. يمكنك الاستمرار في استخدام بعض ميزات التطبيق.</p>
+
+        <div class="connection-status offline" id="connectionStatus">
+            🔴 غير متصل
+        </div>
+
+        <button class="retry-btn" onclick="window.location.reload()">
+            🔄 إعادة المحاولة
+        </button>
+
+        <button class="retry-btn home-btn" onclick="goHome()">
+            🏠 الصفحة الرئيسية
+        </button>
+
+        <div class="features">
+            <h3 style="margin-bottom: 20px;">المميزات المتاحة بدون إنترنت:</h3>
+
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div>عرض البيانات المحفوظة مسبقاً</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">💾</div>
+                <div>حفظ التغييرات محلياً</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <div>مزامنة البيانات عند العودة للاتصال</div>
+            </div>
+
+            <div class="feature">
+                <div class="feature-icon">📱</div>
+                <div>تجربة استخدام كاملة</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // مراقبة حالة الاتصال
+        function updateConnectionStatus() {
+            const statusEl = document.getElementById('connectionStatus');
+
+            if (navigator.onLine) {
+                statusEl.className = 'connection-status online';
+                statusEl.innerHTML = '🟢 متصل';
+
+                // محاولة إعادة التحميل تلقائياً عند عودة الاتصال
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                statusEl.className = 'connection-status offline';
+                statusEl.innerHTML = '🔴 غير متصل';
+            }
+        }
+
+        // مراقبة تغيير حالة الاتصال
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
+
+        // الانتقال للصفحة الرئيسية
+        function goHome() {
+            if ('serviceWorker' in navigator && 'caches' in window) {
+                // محاولة جلب الصفحة الرئيسية من الكاش
+                caches.match('/').then(response => {
+                    if (response) {
+                        window.location.href = '/';
+                    } else {
+                        alert('الصفحة الرئيسية غير متاحة بدون اتصال');
+                    }
+                });
+            } else {
+                window.location.href = '/';
+            }
+        }
+
+        // فحص الاتصال عند تحميل الصفحة
+        updateConnectionStatus();
+
+        // محاولة إعادة الاتصال كل 30 ثانية
+        setInterval(() => {
+            if (!navigator.onLine) {
+                fetch('/', { method: 'HEAD', cache: 'no-cache' })
+                    .then(() => {
+                        if (!navigator.onLine) {
+                            // تحديث حالة الاتصال يدوياً
+                            window.dispatchEvent(new Event('online'));
+                        }
+                    })
+                    .catch(() => {
+                        // لا شيء - ما زال غير متصل
+                    });
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

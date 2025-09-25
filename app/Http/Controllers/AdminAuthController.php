@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AdminUser;
-use Inertia\Inertia;
 
 class AdminAuthController extends Controller
 {
@@ -13,7 +12,7 @@ class AdminAuthController extends Controller
      */
     public function showLogin()
     {
-        return Inertia::render('Auth/AdminLogin');
+        return view('auth.admin-login');
     }
 
     /**

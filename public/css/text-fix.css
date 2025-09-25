@@ -1,0 +1,65 @@
+/* إصلاح سريع للنصوص البيضاء الناتجة عن PWA */
+
+/* إعادة تعيين الألوان للعناصر الأساسية */
+body, html {
+    color: initial !important;
+}
+
+/* حماية جميع النصوص من التأثيرات الخارجية */
+* {
+    color: inherit !important;
+}
+
+/* استثناءات للعناصر التي يجب أن تكون بيضاء */
+.pwa-banner,
+.pwa-banner *,
+.pwa-splash-screen,
+.pwa-splash-screen *,
+.pwa-update-banner,
+.pwa-update-banner *,
+.pwa-welcome-message,
+.pwa-welcome-message *,
+.status-notification,
+.status-notification *,
+#offline-indicator,
+#pwa-install-banner,
+#pwa-install-banner * {
+    color: white !important;
+}
+
+/* تأكيد للعناصر الرئيسية */
+.sidebar-nav a,
+.main-content,
+.data-table,
+.data-table td,
+.data-table th,
+.form-group label,
+.form-group input,
+.btn,
+h1, h2, h3, h4, h5, h6,
+p, span, div, label {
+    color: inherit !important;
+}
+
+/* حماية خاصة للجداول */
+table, tbody, thead, tr, td, th {
+    color: inherit !important;
+}
+
+/* حماية للنماذج */
+form, fieldset, legend, label, input, textarea, select, option {
+    color: inherit !important;
+}
+
+/* حماية للقوائم */
+ul, ol, li, a {
+    color: inherit !important;
+}
+
+/* إعادة تعيين user-select للنصوص العادية */
+body *:not(.pwa-banner):not(.pwa-splash-screen):not(.pwa-update-banner) {
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    -moz-user-select: auto !important;
+    -ms-user-select: auto !important;
+}

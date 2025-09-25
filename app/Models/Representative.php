@@ -3,160 +3,90 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Hash;
 
-class Representative extends Authenticatable
+class Representative extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'name',
         'phone',
         'password',
-        'address',
         'is_active'
     ];
 
     protected $hidden = [
-        'password'
+        'password',
     ];
 
     protected $casts = [
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     */
-    public function getAuthIdentifierName()
+    // تشفير كلمة المرور عند الحفظ
+    public function setPasswordAttribute($password)
     {
-        return 'id';
+        $this->attributes['password'] = Hash::make($password);
     }
 
-    /**
-     * Get the username used for authentication (phone number)
-     */
-    public function getAuthIdentifier()
+    // التحقق من كلمة المرور
+    public function checkPassword($password)
     {
-        return $this->id;
+        return Hash::check($password, $this->password);
     }
 
-    /**
-     * Get the password for authentication
-     */
-    public function getAuthPassword()
-    {
-        return $this->password;
-    }
-
-    // الفلاتر (Scopes)
+    // الحصول على المندوبين النشيطين
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
 
-    // العلاقات
-    public function salaryPlans()
-    {
-        return $this->hasMany(SalaryPlan::class);
-    }
-
-    public function activeSalaryPlans()
-    {
-        return $this->salaryPlans()->active();
-    }
-
-    public function currentSalaryPlans()
-    {
-        return $this->salaryPlans()->current();
-    }
-
-    /**
-     * العلاقة مع الرواتب
-     */
+    // العلاقة مع الرواتب
     public function salaries()
     {
         return $this->hasMany(RepresentativeSalary::class);
     }
 
-    /**
-     * الحصول على الراتب الحالي
-     */
-    public function currentSalary()
+    // الحصول على الراتب النشط
+    public function activeSalary()
     {
-        return $this->salaries()->current()->first();
+        return $this->hasOne(RepresentativeSalary::class)
+            ->where('is_active', true)
+            ->whereDate('effective_from', '<=', now())
+            ->where(function ($query) {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', now());
+            });
     }
 
-    /**
-     * الرواتب النشطة
-     */
-    public function activeSalaries()
+    // العلاقة مع خطط البيع
+    public function salesPlans()
     {
-        return $this->salaries()->active();
+        return $this->hasMany(SalesPlan::class);
     }
 
-    /**
-     * علاقة مع الخطط متعددة المنتجات
-     */
-    public function multiProductPlans()
+    // العلاقة مع تخصيص الخطط
+    public function planAssignments()
     {
-        return $this->hasMany(MultiProductPlan::class);
+        return $this->hasMany(RepresentativePlanAssignment::class);
     }
 
-    /**
-     * الخطط متعددة المنتجات النشطة
-     */
-    public function activeMultiProductPlans()
+    // العلاقة مع إنجازات الخطط
+    public function achievements()
     {
-        return $this->multiProductPlans()->where('status', 'active');
+        return $this->hasMany(PlanAchievement::class);
     }
 
-    /**
-     * علاقة مع خطط الفئات
-     */
-    public function categoryPlans()
+    // حساب الراتب الشهري
+    public function calculateMonthlySalary($month)
     {
-        return $this->hasMany(RepresentativeCategoryPlan::class);
+        return PlanAchievement::calculateMonthlySalary($this->id, $month);
     }
 
-    /**
-     * خطط الفئات النشطة
-     */
-    public function activeCategoryPlans()
+    // إنشاء رقم مندوب تلقائي
+    public static function generateRepresentativeCode()
     {
-        return $this->categoryPlans()->where('status', 'active');
-    }
-
-    /**
-     * علاقة مع خطط الموردين
-     */
-    public function supplierPlans()
-    {
-        return $this->hasMany(RepresentativeSupplierPlan::class);
-    }
-
-    /**
-     * خطط الموردين النشطة
-     */
-    public function activeSupplierPlans()
-    {
-        return $this->supplierPlans()->where('status', 'active');
-    }
-
-    /**
-     * علاقة مع العملاء
-     */
-    public function customers()
-    {
-        return $this->hasMany(RepresentativeCustomer::class);
-    }
-
-    /**
-     * العملاء النشطون
-     */
-    public function activeCustomers()
-    {
-        return $this->customers()->where('is_active', true);
+        $lastRep = self::orderBy('id', 'desc')->first();
+        $lastNumber = $lastRep ? $lastRep->id : 0;
+        return 'REP' . str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
     }
 }

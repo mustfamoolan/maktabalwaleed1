@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>اختبار PWA - نظام إدارة المبيعات</title>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2196F3">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sales System">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <!-- PWA Links -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/images/icon-512x512.svg">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+            direction: rtl;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .test-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .test-section h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .test-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .test-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .test-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .test-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .test-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.success {
+            background: #4CAF50;
+        }
+
+        .status-indicator.error {
+            background: #f44336;
+        }
+
+        .status-indicator.warning {
+            background: #ff9800;
+        }
+
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn.secondary {
+            background: #2196F3;
+        }
+
+        .btn.secondary:hover {
+            background: #1976D2;
+        }
+
+        .btn.danger {
+            background: #f44336;
+        }
+
+        .btn.danger:hover {
+            background: #d32f2f;
+        }
+
+        .log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .feature-item .icon {
+            font-size: 1.5rem;
+            margin-left: 12px;
+            width: 40px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 اختبار PWA</h1>
+            <p>نظام إدارة المبيعات - Progressive Web App</p>
+        </div>
+
+        <!-- حالة PWA -->
+        <div class="test-section">
+            <h2>حالة التطبيق</h2>
+            <div class="test-grid">
+                <div class="test-card" onclick="checkServiceWorker()">
+                    <div class="icon">⚙️</div>
+                    <h3><span class="status-indicator" id="sw-status"></span>Service Worker</h3>
+                    <p id="sw-text">جاري الفحص...</p>
+                </div>
+
+                <div class="test-card" onclick="checkManifest()">
+                    <div class="icon">📋</div>
+                    <h3><span class="status-indicator" id="manifest-status"></span>Manifest</h3>
+                    <p id="manifest-text">جاري الفحص...</p>
+                </div>
+
+                <div class="test-card" onclick="checkInstallable()">
+                    <div class="icon">📱</div>
+                    <h3><span class="status-indicator" id="install-status"></span>قابل للتثبيت</h3>
+                    <p id="install-text">جاري الفحص...</p>
+                </div>
+
+                <div class="test-card" onclick="checkOffline()">
+                    <div class="icon">📡</div>
+                    <h3><span class="status-indicator" id="offline-status"></span>الوضع غير المتصل</h3>
+                    <p id="offline-text">جاري الفحص...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- المميزات -->
+        <div class="test-section">
+            <h2>اختبار المميزات</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="icon">🔔</div>
+                    <div>
+                        <strong>الإشعارات</strong><br>
+                        <button class="btn" onclick="testNotification()">اختبار</button>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="icon">💾</div>
+                    <div>
+                        <strong>التخزين المحلي</strong><br>
+                        <button class="btn" onclick="testStorage()">اختبار</button>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="icon">📶</div>
+                    <div>
+                        <strong>حالة الشبكة</strong><br>
+                        <span id="network-status">متصل</span>
+                    </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="icon">🔄</div>
+                    <div>
+                        <strong>التحديث</strong><br>
+                        <button class="btn secondary" onclick="updateApp()">تحديث</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الإجراءات -->
+        <div class="test-section">
+            <h2>إجراءات التطبيق</h2>
+            <div style="text-align: center;">
+                <button class="btn" onclick="installPWA()">📱 تثبيت التطبيق</button>
+                <button class="btn secondary" onclick="showOfflinePage()">📄 صفحة الأوف لاين</button>
+                <button class="btn secondary" onclick="clearCache()">🗑️ مسح التخزين المؤقت</button>
+                <button class="btn danger" onclick="unregisterSW()">❌ إلغاء تسجيل SW</button>
+            </div>
+        </div>
+
+        <!-- السجل -->
+        <div class="test-section">
+            <h2>سجل الأحداث</h2>
+            <div class="log" id="log"></div>
+            <button class="btn secondary" onclick="clearLog()">مسح السجل</button>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+
+        // سجل الأحداث
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString('ar-SA');
+            const typeEmoji = {
+                'info': 'ℹ️',
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️'
+            };
+
+            logEl.textContent += `${timestamp} ${typeEmoji[type]} ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        // فحص Service Worker
+        function checkServiceWorker() {
+            const statusEl = document.getElementById('sw-status');
+            const textEl = document.getElementById('sw-text');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        statusEl.className = 'status-indicator success';
+                        textEl.textContent = 'مفعل ويعمل';
+                        log('Service Worker مسجل ويعمل', 'success');
+                    } else {
+                        statusEl.className = 'status-indicator warning';
+                        textEl.textContent = 'غير مسجل';
+                        log('Service Worker غير مسجل', 'warning');
+                    }
+                });
+            } else {
+                statusEl.className = 'status-indicator error';
+                textEl.textContent = 'غير مدعوم';
+                log('Service Worker غير مدعوم في هذا المتصفح', 'error');
+            }
+        }
+
+        // فحص Manifest
+        function checkManifest() {
+            const statusEl = document.getElementById('manifest-status');
+            const textEl = document.getElementById('manifest-text');
+
+            fetch('/manifest.json')
+                .then(response => response.json())
+                .then(manifest => {
+                    statusEl.className = 'status-indicator success';
+                    textEl.textContent = 'متاح وصحيح';
+                    log('Manifest متاح: ' + manifest.name, 'success');
+                })
+                .catch(error => {
+                    statusEl.className = 'status-indicator error';
+                    textEl.textContent = 'غير متاح';
+                    log('خطأ في تحميل Manifest: ' + error.message, 'error');
+                });
+        }
+
+        // فحص إمكانية التثبيت
+        function checkInstallable() {
+            const statusEl = document.getElementById('install-status');
+            const textEl = document.getElementById('install-text');
+
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                statusEl.className = 'status-indicator success';
+                textEl.textContent = 'مثبت بالفعل';
+                log('التطبيق مثبت ويعمل في وضع standalone', 'success');
+            } else if (deferredPrompt) {
+                statusEl.className = 'status-indicator success';
+                textEl.textContent = 'جاهز للتثبيت';
+                log('التطبيق جاهز للتثبيت', 'success');
+            } else {
+                statusEl.className = 'status-indicator warning';
+                textEl.textContent = 'غير جاهز';
+                log('التطبيق غير جاهز للتثبيت حالياً', 'warning');
+            }
+        }
+
+        // فحص الوضع غير المتصل
+        function checkOffline() {
+            const statusEl = document.getElementById('offline-status');
+            const textEl = document.getElementById('offline-text');
+
+            if ('serviceWorker' in navigator) {
+                caches.has('sales-system-v1.2.0').then(hasCache => {
+                    if (hasCache) {
+                        statusEl.className = 'status-indicator success';
+                        textEl.textContent = 'مدعوم';
+                        log('الوضع غير المتصل مدعوم - البيانات محفوظة', 'success');
+                    } else {
+                        statusEl.className = 'status-indicator warning';
+                        textEl.textContent = 'غير جاهز';
+                        log('لا توجد بيانات محفوظة للوضع غير المتصل', 'warning');
+                    }
+                });
+            } else {
+                statusEl.className = 'status-indicator error';
+                textEl.textContent = 'غير مدعوم';
+                log('الوضع غير المتصل غير مدعوم', 'error');
+            }
+        }
+
+        // اختبار الإشعارات
+        function testNotification() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        new Notification('🎉 اختبار الإشعارات', {
+                            body: 'الإشعارات تعمل بنجاح!',
+                            icon: '/images/icon-192x192.png'
+                        });
+                        log('تم إرسال إشعار اختبار', 'success');
+                    } else {
+                        log('الإشعارات غير مسموحة', 'warning');
+                    }
+                });
+            } else {
+                log('الإشعارات غير مدعومة', 'error');
+            }
+        }
+
+        // اختبار التخزين المحلي
+        function testStorage() {
+            try {
+                const testData = {
+                    message: 'اختبار التخزين المحلي',
+                    timestamp: Date.now()
+                };
+
+                localStorage.setItem('pwa-test', JSON.stringify(testData));
+                const retrieved = JSON.parse(localStorage.getItem('pwa-test'));
+
+                if (retrieved.message === testData.message) {
+                    log('التخزين المحلي يعمل بنجاح', 'success');
+                } else {
+                    log('خطأ في قراءة البيانات المحفوظة', 'error');
+                }
+            } catch (error) {
+                log('خطأ في التخزين المحلي: ' + error.message, 'error');
+            }
+        }
+
+        // تثبيت PWA
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(result => {
+                    if (result.outcome === 'accepted') {
+                        log('المستخدم وافق على التثبيت', 'success');
+                    } else {
+                        log('المستخدم رفض التثبيت', 'info');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                log('التطبيق غير جاهز للتثبيت أو مثبت بالفعل', 'warning');
+            }
+        }
+
+        // عرض صفحة الأوف لاين
+        function showOfflinePage() {
+            window.open('/offline.html', '_blank');
+        }
+
+        // مسح التخزين المؤقت
+        function clearCache() {
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }).then(() => {
+                    log('تم مسح جميع التخزين المؤقت', 'success');
+                    location.reload();
+                });
+            }
+        }
+
+        // إلغاء تسجيل Service Worker
+        function unregisterSW() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => {
+                        registration.unregister();
+                    });
+                    log('تم إلغاء تسجيل جميع Service Workers', 'success');
+                    location.reload();
+                });
+            }
+        }
+
+        // تحديث التطبيق
+        function updateApp() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistration().then(registration => {
+                    if (registration) {
+                        registration.update();
+                        log('تم طلب تحديث Service Worker', 'info');
+                    }
+                });
+            }
+        }
+
+        // مسح السجل
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        // مراقبة حالة الشبكة
+        function updateNetworkStatus() {
+            const statusEl = document.getElementById('network-status');
+            if (navigator.onLine) {
+                statusEl.textContent = '🌐 متصل';
+                statusEl.style.color = '#4CAF50';
+            } else {
+                statusEl.textContent = '📡 غير متصل';
+                statusEl.style.color = '#f44336';
+            }
+        }
+
+        // الأحداث
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredPrompt = e;
+            log('التطبيق جاهز للتثبيت', 'info');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            log('تم تثبيت التطبيق بنجاح!', 'success');
+            deferredPrompt = null;
+        });
+
+        window.addEventListener('online', () => {
+            updateNetworkStatus();
+            log('عاد الاتصال بالإنترنت', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            updateNetworkStatus();
+            log('انقطع الاتصال بالإنترنت', 'warning');
+        });
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            log('تم تحميل صفحة اختبار PWA', 'info');
+            updateNetworkStatus();
+
+            // فحص جميع المكونات
+            setTimeout(() => {
+                checkServiceWorker();
+                checkManifest();
+                checkInstallable();
+                checkOffline();
+            }, 1000);
+        });
+
+        // تسجيل Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    log('Service Worker مسجل بنجاح', 'success');
+                })
+                .catch(error => {
+                    log('فشل في تسجيل Service Worker: ' + error.message, 'error');
+                });
+        }
+    </script>
+</body>
+</html>

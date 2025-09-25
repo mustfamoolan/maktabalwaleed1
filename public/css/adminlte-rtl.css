@@ -1,0 +1,245 @@
+/* AdminLTE RTL Customizations */
+body {
+    direction: rtl;
+    text-align: right;
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Navbar RTL */
+.main-header .navbar-nav .nav-link {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
+.navbar-nav.mr-auto {
+    margin-right: 0 !important;
+    margin-left: auto !important;
+}
+
+.navbar-brand {
+    margin-right: 0 !important;
+    margin-left: 1rem !important;
+}
+
+/* Sidebar RTL */
+.main-sidebar {
+    right: 0;
+    left: auto;
+}
+
+.sidebar-mini .main-sidebar .nav-link {
+    text-align: right;
+}
+
+.nav-sidebar .nav-link p {
+    margin-right: 0.5rem;
+    margin-left: 0;
+}
+
+.nav-sidebar .nav-icon {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}
+
+/* Content Wrapper RTL */
+.content-wrapper {
+    margin-right: 250px;
+    margin-left: 0;
+}
+
+.sidebar-mini.sidebar-collapse .content-wrapper {
+    margin-right: 4.6rem;
+    margin-left: 0;
+}
+
+/* Dropdown RTL */
+.dropdown-menu-right {
+    right: auto !important;
+    left: 0 !important;
+}
+
+/* Float classes RTL */
+.float-right {
+    float: left !important;
+}
+
+.float-left {
+    float: right !important;
+}
+
+.float-sm-right {
+    float: left !important;
+}
+
+/* Text align RTL */
+.text-right {
+    text-align: left !important;
+}
+
+.text-left {
+    text-align: right !important;
+}
+
+/* Cards RTL */
+.card-header {
+    text-align: right;
+}
+
+.card-body {
+    text-align: right;
+}
+
+/* Forms RTL */
+.form-group label {
+    text-align: right;
+}
+
+.form-control {
+    text-align: right;
+}
+
+/* Buttons RTL */
+.btn .fas, .btn .fa {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}
+
+/* Tables RTL */
+.table th, .table td {
+    text-align: right;
+}
+
+.table th:first-child {
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.table th:last-child {
+    border-radius: 0.25rem 0 0 0.25rem;
+}
+
+/* Custom Colors */
+.sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.content-header h1 {
+    color: #343a40;
+    font-weight: 600;
+}
+
+/* Arabic Font Improvements */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+}
+
+.card-title {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-weight: 600;
+}
+
+/* Search Box Styling */
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Table Hover Effects */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.075);
+}
+
+/* Button Enhancements */
+.btn-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    border: none;
+}
+
+/* Card Styling */
+.card {
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+.card-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Content Header Background */
+.content-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+/* Sidebar Menu Styling */
+.nav-sidebar .nav-item > .nav-link {
+    border-radius: 0.25rem;
+    margin: 0.1rem 0.5rem;
+}
+
+.nav-sidebar .nav-item > .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Status Badge */
+.badge-success {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .content-wrapper {
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .main-sidebar {
+        right: -250px;
+    }
+
+    .sidebar-open .main-sidebar {
+        right: 0;
+    }
+}
+
+/* Animation Enhancements */
+.main-sidebar, .content-wrapper {
+    transition: all 0.3s ease-in-out;
+}
+
+.nav-sidebar .nav-link {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.card {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.15);
+}

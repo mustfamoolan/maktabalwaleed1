@@ -3,60 +3,41 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RepresentativeSalary extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'representative_id',
-        'base_salary',
-        'allowances',
-        'deductions',
-        'is_active',
-        'effective_date',
-        'notes'
+        'basic_salary',
+        'effective_from',
+        'effective_to',
+        'is_active'
     ];
 
     protected $casts = [
-        'base_salary' => 'decimal:2',
-        'allowances' => 'decimal:2',
-        'deductions' => 'decimal:2',
-        'is_active' => 'boolean',
-        'effective_date' => 'date'
+        'basic_salary' => 'decimal:2',
+        'effective_from' => 'date',
+        'effective_to' => 'date',
+        'is_active' => 'boolean'
     ];
 
-    /**
-     * العلاقة مع المندوب
-     */
-    public function representative()
+    // العلاقة مع المندوب
+    public function representative(): BelongsTo
     {
         return $this->belongsTo(Representative::class);
     }
 
-    /**
-     * حساب إجمالي الراتب
-     */
-    public function getTotalSalaryAttribute()
+    // الحصول على الراتب النشط للمندوب
+    public static function getActiveSalary($representativeId)
     {
-        return $this->base_salary + $this->allowances - $this->deductions;
-    }
-
-    /**
-     * Scope للرواتب النشطة
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    /**
-     * الحصول على آخر راتب نشط للمندوب
-     */
-    public function scopeCurrent($query)
-    {
-        return $query->where('is_active', true)
-                    ->orderBy('effective_date', 'desc');
+        return self::where('representative_id', $representativeId)
+            ->where('is_active', true)
+            ->whereDate('effective_from', '<=', now())
+            ->where(function ($query) {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', now());
+            })
+            ->first();
     }
 }
